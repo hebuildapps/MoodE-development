@@ -1,0 +1,74 @@
+code {
+    color: #f80000;
+    font-size: 16px;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 4px;
+    margin: 10px 0;
+    overflow-x: auto;
+}
+
+.code2 {
+    color: blue;
+}
+
+.welcome {
+    position: absolute;
+    padding-top: 20px;
+    padding: 5px;
+    border: 1px solid #000;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    position: absolute;
+    top: calc(50% - 90px);
+    left: calc(50% - 180px);
+    backdrop-filter: blur(4px);
+    background-color: rgba(0, 0, 0, 0.125);
+}
+
+.welcome-content {
+    margin-top: 5px;
+    border: 0.5px;
+    border-radius: 15px;
+    padding: 30px;
+    background-color: #fff;
+}
+
+.closebutton {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    background-color: #EC6B5E;
+    border-radius: 16px;
+    border: solid 1px rgba(0, 0, 0, 0.25);
+    margin-left: 6px;
+}
+
+.welcomeheader {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    cursor: move;
+    justify-content: space-between;
+    margin-top: 1px;
+}
+
+.icons{
+    width:50px;
+    height:52px;
+    margin-bottom: 0px;
+    border-radius: 16px;
+}
+.icon-name{
+    margin-top: 0px;
+    font-family: 'Courier New', Courier, monospace;
+    color: #fff;
+    
+}
+
+.desktopApps{
+    padding: 240px;
+    cursor: pointer;
+
+}
