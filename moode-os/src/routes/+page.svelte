@@ -18,25 +18,23 @@
 	class="desktop"
 	style="background-image: url(/OS/Assets/wall.gif); background-size: cover; background-repeat: no-repeat;"
 >
-	<nav class="navbar">
-		<p class="navbar-brand">moodEOS</p>
-		<p class="navbar-status">☀️ Keep Hustling! ☁️</p>
-		<p class="navbar-time">{time}</p>
-	</nav>
-
 	<div class="desktop-icons">
-		<div class="desktop-icon" onclick={() => (welcomeVisible = true)}>
+		<button type="button" class="desktop-icon" onclick={() => (welcomeVisible = true)}>
 			<img src="/OS/Assets/notepad_retrox86.png" alt="Welcome" class="icons" />
 			<p class="icon-name">Welcome</p>
-		</div>
-		<div class="desktop-icon">
+		</button>
+		<button type="button" class="desktop-icon">
 			<img src="/OS/Assets/moode_OS.png" alt="Bootloader" class="icons" />
 			<p class="icon-name">Bootloader</p>
-		</div>
+		</button>
+	</div>
+
+	<div class="bottom-bar">
+		<p class="bar-status">☀️ Keep Hustling! ☁️</p>
+		<p class="bar-time">{time}</p>
 	</div>
 
 	{#if welcomeVisible}
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			id="welcome"
 			class="welcome"
@@ -44,9 +42,7 @@
 			style="left: 50%; top: 50%; transform: translate(-50%, -50%);"
 		>
 			<div id="welcomeheader" class="welcomeheader">
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
-				<div class="closebutton" onclick={() => (welcomeVisible = false)}></div>
-				<p style="margin: 0; color: #fff; font-weight: 500">Welcome</p>
+				<button type="button" class="closebutton" onclick={() => (welcomeVisible = false)}></button>
 			</div>
 			<div class="welcome-content">
 				<img
@@ -72,69 +68,73 @@
 		margin: 0;
 	}
 
-	.navbar {
-		position: absolute;
-		width: 100%;
-		display: flex;
-		backdrop-filter: blur(10px);
-		background-color: rgba(0, 0, 0, 0.125);
-		color: #fff;
-		justify-content: space-between;
-		gap: 32px;
-	}
-
-	.navbar-brand {
-		margin-left: 16px;
-		font-weight: 700;
-		background-color: rgba(256, 256, 256, 0.125);
-		padding: 4px 12px;
-		border-radius: 16px;
-	}
-
-	.navbar-status {
-		margin-left: 16px;
-		background-color: rgba(256, 256, 256, 0.25);
-		padding: 4px 12px;
-		border-radius: 16px;
-	}
-
-	.navbar-time {
-		margin-right: 16px;
-		background-color: rgba(256, 256, 256, 0.125);
-		padding: 4px 12px;
-		border-radius: 16px;
-	}
-
 	.desktop-icons {
-		padding-top: 500px;
-		padding-left: 16px;
+		position: absolute;
+		top: 16px;
+		left: 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
 	}
 
 	.desktop-icon {
+		all: unset;
+		cursor: pointer;
 		text-align: center;
 		padding: 16px;
 		filter: drop-shadow(0 0 8px black);
 		width: fit-content;
-		cursor: pointer;
+	}
+
+	.desktop-icon:hover {
+		filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
 	}
 
 	.icons {
 		width: 50px;
 		height: 52px;
-		margin-bottom: 0;
+		display: block;
+		margin: 0 auto;
 		border-radius: 16px;
 	}
 
 	.icon-name {
-		margin-top: 0;
+		margin-top: 4px;
 		font-family: 'Courier New', Courier, monospace;
+		color: #fff;
+		font-size: 14px;
+	}
+
+	.bottom-bar {
+		position: fixed;
+		bottom: 20px;
+		left: 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	.bar-status {
+		background-color: rgba(256, 256, 256, 0.25);
+		padding: 4px 12px;
+		border-radius: 16px;
+		margin: 0;
+		width: fit-content;
+		color: #fff;
+	}
+
+	.bar-time {
+		background-color: rgba(256, 256, 256, 0.125);
+		padding: 4px 12px;
+		border-radius: 16px;
+		margin: 0;
+		width: fit-content;
 		color: #fff;
 	}
 
 	.welcome {
 		position: absolute;
 		padding: 5px;
-		padding-top: 20px;
 		border: 1px solid #000;
 		background: #fff;
 		display: flex;
@@ -153,6 +153,7 @@
 	}
 
 	.closebutton {
+		all: unset;
 		width: 16px;
 		height: 16px;
 		cursor: pointer;
@@ -160,6 +161,11 @@
 		border-radius: 16px;
 		border: solid 1px rgba(0, 0, 0, 0.25);
 		margin-left: 6px;
+		flex-shrink: 0;
+	}
+
+	.closebutton:hover {
+		filter: brightness(1.1);
 	}
 
 	.welcomeheader {

@@ -1,8 +1,6 @@
 export function draggable(node: HTMLElement, header?: HTMLElement) {
 	const target = header || node;
-	let pos1 = 0,
-		pos2 = 0,
-		pos3 = 0,
+	let pos3 = 0,
 		pos4 = 0;
 	let initialLeft = 0,
 		initialTop = 0;
@@ -16,7 +14,11 @@ export function draggable(node: HTMLElement, header?: HTMLElement) {
 		initialLeft = rect.left;
 		initialTop = rect.top;
 
+		// Remove centering transform and immediately set position to
+		// the current visual coordinates so the element doesn't jump.
 		node.style.transform = 'none';
+		node.style.left = initialLeft + 'px';
+		node.style.top = initialTop + 'px';
 
 		document.addEventListener('mousemove', elementDrag);
 		document.addEventListener('mouseup', closeDragElement);
