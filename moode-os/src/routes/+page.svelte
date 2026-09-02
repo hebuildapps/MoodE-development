@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { draggable } from '$lib/actions/draggable';
 
 	let time = $state(new Date().toLocaleString());
@@ -26,6 +27,10 @@
 		<button type="button" class="desktop-icon">
 			<img src="/OS/Assets/moode_OS.png" alt="Bootloader" class="icons" />
 			<p class="icon-name">Bootloader</p>
+		</button>
+		<button type="button" class="desktop-icon" onclick={() => goto('/player')}>
+			<img src="/skater-skate.gif" alt="Tracks" class="icons" />
+			<p class="icon-name">Tracks</p>
 		</button>
 	</div>
 
