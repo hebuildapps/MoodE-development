@@ -4,6 +4,7 @@
 
 	let time = $state(new Date().toLocaleString());
 	let welcomeVisible = $state(true);
+	let bootloaderVisible = $state(false);
 
 	$effect(() => {
 		const id = setInterval(() => (time = new Date().toLocaleString()), 1000);
@@ -24,7 +25,7 @@
 			<img src="/OS/Assets/notepad_retrox86.png" alt="Welcome" class="icons" />
 			<p class="icon-name">Welcome</p>
 		</button>
-		<button type="button" class="desktop-icon">
+		<button type="button" class="desktop-icon" onclick={() => (bootloaderVisible = true)}>
 			<img src="/OS/Assets/moode_OS.png" alt="Bootloader" class="icons" />
 			<p class="icon-name">Bootloader</p>
 		</button>
@@ -42,14 +43,14 @@
 	{#if welcomeVisible}
 		<div
 			id="welcome"
-			class="welcome"
+			class="os-window"
 			use:draggable={undefined}
 			style="left: 50%; top: 50%; transform: translate(-50%, -50%);"
 		>
-			<div id="welcomeheader" class="welcomeheader">
+			<div id="welcomeheader" class="os-window-header">
 				<button type="button" class="closebutton" onclick={() => (welcomeVisible = false)}></button>
 			</div>
-			<div class="welcome-content">
+			<div class="os-window-content">
 				<img
 					src="/OS/Assets/moode_OS.png"
 					alt="moodEOS"
@@ -61,6 +62,40 @@
 					<br />
 					<code>real-life</code> and <code class="code2">digital-life</code> together!
 				</p>
+			</div>
+		</div>
+	{/if}
+
+	{#if bootloaderVisible}
+		<div
+			id="bootloader"
+			class="os-window"
+			use:draggable={undefined}
+			style="left: 42%; top: 28%;"
+		>
+			<div id="bootloaderheader" class="os-window-header">
+				<button
+					type="button"
+					class="closebutton"
+					onclick={() => (bootloaderVisible = false)}
+				></button>
+				<span class="os-window-title">Bootloader</span>
+			</div>
+			<div class="os-window-content bootloader-content">
+				<img
+					src="/OS/Assets/moode_OS.png"
+					alt="Bootloader"
+					style="width: 48px; height: 48px; border-radius: 24px; object-fit: cover"
+				/>
+				<h2 style="margin: 8px 0 4px">Bootloader</h2>
+				<p style="margin: 0; max-width: 280px; line-height: 1.4">
+					Hardware bridge settings — camera, serial port, and emotion model — coming soon.
+				</p>
+				<ul class="bootloader-list">
+					<li>Camera index</li>
+					<li>Serial port</li>
+					<li>Model path</li>
+				</ul>
 			</div>
 		</div>
 	{/if}
@@ -137,24 +172,49 @@
 		color: #fff;
 	}
 
-	.welcome {
+	.os-window {
 		position: absolute;
 		padding: 5px;
 		border: 1px solid #000;
-		background: #fff;
 		display: flex;
 		flex-direction: column;
 		border-radius: 16px;
 		backdrop-filter: blur(4px);
 		background-color: rgba(0, 0, 0, 0.125);
+		z-index: 10;
 	}
 
-	.welcome-content {
+	.os-window-content {
 		margin-top: 5px;
-		border: 0.5px;
 		border-radius: 15px;
 		padding: 30px;
 		background-color: #fff;
+	}
+
+	.bootloader-content {
+		text-align: center;
+	}
+
+	.bootloader-list {
+		margin: 16px 0 0;
+		padding: 0;
+		list-style: none;
+		text-align: left;
+		font-family: 'Courier New', Courier, monospace;
+		font-size: 13px;
+		color: #333;
+	}
+
+	.bootloader-list li {
+		padding: 6px 10px;
+		margin-bottom: 4px;
+		border-radius: 8px;
+		background: rgba(0, 0, 0, 0.06);
+	}
+
+	.bootloader-list li::before {
+		content: '○ ';
+		color: #888;
 	}
 
 	.closebutton {
@@ -173,13 +233,21 @@
 		filter: brightness(1.1);
 	}
 
-	.welcomeheader {
+	.os-window-header {
 		width: 100%;
 		display: flex;
 		align-items: center;
 		cursor: move;
-		justify-content: space-between;
+		gap: 8px;
 		margin-top: 1px;
+		min-height: 18px;
+	}
+
+	.os-window-title {
+		font-size: 12px;
+		color: #fff;
+		font-family: 'Courier New', Courier, monospace;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 	}
 
 	code {
