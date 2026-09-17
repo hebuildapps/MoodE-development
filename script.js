@@ -930,12 +930,12 @@ let isChatLoading = false;
 let currentChatMode = 'ai'; // 'ai' or 'human'
 
 // Determine API Base:
-// When running locally, port 5174 provides the CORS proxy that safely communicates with heramb.icu.
-// If the page is hosted on localhost/127.0.0.1 (even on IDE preview ports), route through http://127.0.0.1:5174.
+// When deployed on Vercel, vercel.json rewrites /api/* directly to https://heramb.icu/api/* (same-origin, 0 CORS blocks).
+// When running locally, port 5174 local proxy routes requests.
 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const API_BASE = isLocal
     ? (window.location.port === '5174' ? '' : 'http://127.0.0.1:5174')
-    : 'https://heramb.icu';
+    : '';
 const CHAT_API_URL = `${API_BASE}/api/chat`;
 const RELAY_API_URL = `${API_BASE}/api/chat/relay`;
 

@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/chat",
+      "destination": "https://heramb.icu/api/chat"
+    },
+    {
+      "source": "/api/chat/relay",
+      "destination": "https://heramb.icu/api/chat/relay"
+    }
+  ]
+}
