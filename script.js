@@ -957,13 +957,41 @@ function setModeBadge(mode) {
     }
 }
 
+function formatChatMarkdown(raw) {
+    if (!raw) return '';
+    // Normalize unicode non-breaking hyphens / dashes to standard hyphens
+    let safe = raw
+        .replace(/[\u2010\u2011\u2012\u2013\u2014\u2015]/g, '-')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    // Convert **bold** and __bold__
+    safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    safe = safe.replace(/__(.*?)__/g, '<strong>$1</strong>');
+
+    // Convert *italic*
+    safe = safe.replace(/(^|[^*])\*([^*]+)\*([^*]|$)/g, '$1<em>$2</em>$3');
+
+    // Convert URLs into clickable links
+    safe = safe.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="purple-contact-link">$1</a>');
+
+    // Convert newlines to breaks
+    safe = safe.replace(/\n\n+/g, '<br><br>').replace(/\n/g, '<br>');
+    return safe;
+}
+
 // Append message bubbles to chat UI
 function appendChatBubble(role, text) {
     const stream = document.getElementById('contact-chat-stream');
     if (!stream) return;
     const bubble = document.createElement('div');
     bubble.className = role === 'user' ? 'my_message' : 'thomas_message';
-    bubble.textContent = text;
+    if (role === 'user') {
+        bubble.textContent = text;
+    } else {
+        bubble.innerHTML = formatChatMarkdown(text);
+    }
     stream.appendChild(bubble);
     stream.scrollTop = stream.scrollHeight;
     return bubble;
