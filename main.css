@@ -1621,3 +1621,94 @@ body.cursor-launching * {
         transform: translateY(0);
     }
 }
+
+/* ==========================================================================
+   Mobile Friendly Responsive Overrides (Phones & Small Tablets)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* Top Navigation Bar: compact, elegant spacing */
+    .topbar {
+        height: 36px;
+        padding: 0 8px;
+        gap: 6px;
+    }
+
+    .topbar-brand {
+        font-size: 12px;
+        padding: 3px 8px;
+        border-radius: 12px;
+    }
+
+    .mood-status-pill {
+        padding: 3px 8px;
+        font-size: 11px;
+        gap: 4px;
+        border-radius: 12px;
+        max-width: 140px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .mood-status-pill .apple-emoji {
+        width: 13px;
+        height: 13px;
+    }
+
+    .clock-pill {
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 12px;
+        white-space: nowrap;
+    }
+
+    /* macOS Floating Dock: gracefully scale down and scroll smoothly horizontally without overflowing */
+    .macos-dock {
+        bottom: 8px;
+        width: calc(100vw - 16px);
+        max-width: 100vw;
+        display: flex;
+        justify-content: center;
+        padding: 0 4px;
+    }
+
+    .dock-container {
+        gap: 6px;
+        padding: 6px 8px 5px 8px;
+        border-radius: 18px;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .dock-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .dock-icon-img {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+    }
+
+    .dock-separator {
+        height: 28px;
+        margin: 0 1px 4px 1px;
+    }
+
+    .dock-item:hover {
+        transform: scale(1.1) translateY(-3px);
+    }
+
+    .dock-tooltip {
+        display: none; /* Hide tooltips on touch devices to avoid tap glitches */
+    }
+
+    /* Windows on mobile: ensure comfortable touch and full responsiveness */
+    .os-window {
+        max-width: 95vw !important;
+        max-height: 85vh !important;
+    }
+}

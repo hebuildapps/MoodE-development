@@ -10,19 +10,25 @@ function updateTime() {
     if (!timeElement) return;
 
     const now = new Date();
-    // Format matching screenshot: 7/23/2023, 2:46:43 PM
-    const formatted = now.toLocaleDateString('en-US', {
-        month: 'numeric',
-        day: 'numeric',
-        year: 'numeric'
-    }) + ', ' + now.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-    });
-
-    timeElement.textContent = formatted;
+    // Shorter format on mobile, full date+time on desktop
+    if (window.innerWidth <= 768) {
+        timeElement.textContent = now.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+    } else {
+        timeElement.textContent = now.toLocaleDateString('en-US', {
+            month: 'numeric',
+            day: 'numeric',
+            year: 'numeric'
+        }) + ', ' + now.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+    }
 }
 
 updateTime();
