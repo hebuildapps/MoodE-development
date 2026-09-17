@@ -1,95 +1,795 @@
-function updateTime() {
-    var timeText = document.querySelector("#timeElement");
-    if (timeText) {
-        timeText.innerHTML = new Date().toLocaleString();
-    }
-}
-updateTime();
+/**
+ * MoodE OS - Desktop Operating System Logic
+ */
 
+// =============================================================================
+// 1. Digital Clock & Timestamp Formatter
+// =============================================================================
+function updateTime() {
+    const timeElement = document.getElementById("timeElement");
+    if (!timeElement) return;
+
+    const now = new Date();
+    // Format matching screenshot: 7/23/2023, 2:46:43 PM
+    const formatted = now.toLocaleDateString('en-US', {
+        month: 'numeric',
+        day: 'numeric',
+        year: 'numeric'
+    }) + ', ' + now.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    });
+
+    timeElement.textContent = formatted;
+}
+
+updateTime();
 setInterval(updateTime, 1000);
 
-// Set initial position after DOM load
-document.addEventListener("DOMContentLoaded", () => {
-    const welcomeDiv = document.getElementById("welcome");
-    welcomeDiv.style.left = "50%";
-    welcomeDiv.style.top = "50%";
-    welcomeDiv.style.transform = "translate(-50%, -50%)";
-});
+// =============================================================================
+// Mood State Selector (with Apple Emojis)
+// =============================================================================
+const moodPill = document.getElementById('mood-pill');
+const moodMenu = document.getElementById('mood-menu');
+const moodStatusText = document.getElementById('mood-status-text');
+const moodOverlay = document.getElementById('mood-overlay');
 
-// Initialize dragging on the correct element
-dragElement(document.getElementById("welcome"));
+const moodDefinitions = {
+    learning: {
+        html: `<img class="apple-emoji" src="OS/Assets/emojis/sun_behind_small_cloud.png" alt="🌤️"> Always Learning <img class="apple-emoji" src="OS/Assets/emojis/cloud.png" alt="☁️">`,
+        tint: 'rgba(0, 0, 0, 0)'
+    },
+    hustling: {
+        html: `<img class="apple-emoji" src="OS/Assets/emojis/sun.png" alt="☀️"> Keep Hustling! <img class="apple-emoji" src="OS/Assets/emojis/cloud.png" alt="☁️">`,
+        tint: 'rgba(255, 180, 0, 0.12)'
+    },
+    focused: {
+        html: `<img class="apple-emoji" src="OS/Assets/emojis/headphones.png" alt="🎧"> Deep Focus Mode <img class="apple-emoji" src="OS/Assets/emojis/zap.png" alt="⚡">`,
+        tint: 'rgba(56, 189, 248, 0.14)'
+    },
+    calm: {
+        html: `<img class="apple-emoji" src="OS/Assets/emojis/herb.png" alt="🌿"> Serene & Relaxed <img class="apple-emoji" src="OS/Assets/emojis/water_wave.png" alt="🌊">`,
+        tint: 'rgba(34, 197, 94, 0.12)'
+    },
+    night: {
+        html: `<img class="apple-emoji" src="OS/Assets/emojis/crescent_moon.png" alt="🌙"> Late Night Hacker <img class="apple-emoji" src="OS/Assets/emojis/laptop.png" alt="💻">`,
+        tint: 'rgba(147, 51, 234, 0.16)'
+    }
+};
 
-function dragElement(element) {
-    let pos1 = 0,
-        pos2 = 0,
-        pos3 = 0,
-        pos4 = 0;
+if (moodPill && moodMenu) {
+    moodPill.addEventListener('click', (e) => {
+        e.stopPropagation();
+        moodMenu.classList.toggle('active');
+    });
 
-    // Use the header element for dragging
-    const header = document.getElementById(element.id + "header");
-    if (header) {
-        header.onmousedown = dragMouseDown;
-    } else {
-        element.onmousedown = dragMouseDown;
+    document.addEventListener('click', (e) => {
+        if (!moodMenu.contains(e.target) && !moodPill.contains(e.target)) {
+            moodMenu.classList.remove('active');
+        }
+    });
+
+    document.querySelectorAll('.mood-option').forEach(option => {
+        option.addEventListener('click', () => {
+            const mood = option.getAttribute('data-mood');
+            if (mood && moodDefinitions[mood]) {
+                if (moodStatusText) moodStatusText.innerHTML = moodDefinitions[mood].html;
+                if (moodOverlay) moodOverlay.style.backgroundColor = moodDefinitions[mood].tint;
+            }
+            moodMenu.classList.remove('active');
+        });
+    });
+}
+
+// =============================================================================
+// 2. Custom Cursor Transitions & Launch Effects
+// =============================================================================
+let rainbowCursorEl = null;
+let lastMouseX = window.innerWidth / 2;
+let lastMouseY = window.innerHeight / 2;
+
+window.addEventListener('mousemove', (e) => {
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+    if (rainbowCursorEl && rainbowCursorEl.classList.contains('active')) {
+        rainbowCursorEl.style.left = `${lastMouseX}px`;
+        rainbowCursorEl.style.top = `${lastMouseY}px`;
+    }
+}, { passive: true });
+
+function triggerLaunchCursor() {
+    if (!rainbowCursorEl) {
+        rainbowCursorEl = document.createElement('div');
+        rainbowCursorEl.id = 'mac-rainbow-cursor';
+        rainbowCursorEl.innerHTML = `<img src="OS/Assets/rainbow_spinner.gif" alt="Spinning Rainbow Beachball" />`;
+        document.body.appendChild(rainbowCursorEl);
     }
 
-    function dragMouseDown(e) {
-        e = e || window.event;
+    rainbowCursorEl.style.left = `${lastMouseX}px`;
+    rainbowCursorEl.style.top = `${lastMouseY}px`;
+    rainbowCursorEl.classList.add('active');
+    document.body.classList.add('cursor-launching');
+
+    setTimeout(() => {
+        if (rainbowCursorEl) rainbowCursorEl.classList.remove('active');
+        document.body.classList.remove('cursor-launching');
+    }, 650);
+}
+
+// =============================================================================
+// 3. Window Management (Center-Opening, Z-Index, Dragging, Minimize/Restore)
+// =============================================================================
+let highestZIndex = 100;
+
+function bringToFront(windowElement) {
+    highestZIndex++;
+    windowElement.style.zIndex = highestZIndex;
+    
+    // Update active class
+    document.querySelectorAll('.os-window').forEach(win => win.classList.remove('active'));
+    windowElement.classList.add('active');
+}
+
+function centerWindow(win) {
+    if (!win) return;
+
+    // Ensure window is displayed to get accurate measurements
+    const previousDisplay = win.style.display;
+    if (previousDisplay === 'none' || getComputedStyle(win).display === 'none') {
+        win.style.visibility = 'hidden';
+        win.style.display = 'flex';
+    }
+
+    const rect = win.getBoundingClientRect();
+    const winWidth = rect.width || win.offsetWidth || 420;
+    const winHeight = rect.height || win.offsetHeight || 380;
+
+    if (previousDisplay === 'none') {
+        win.style.display = previousDisplay;
+        win.style.visibility = 'visible';
+    }
+
+    const left = Math.max(10, Math.round((window.innerWidth - winWidth) / 2));
+    const top = Math.max(48, Math.round((window.innerHeight - winHeight) / 2));
+
+    win.style.transform = 'none';
+    win.style.right = 'auto';
+    win.style.bottom = 'auto';
+    win.style.left = `${left}px`;
+    win.style.top = `${top}px`;
+}
+
+function updateDockIndicators() {
+    document.querySelectorAll('.dock-item').forEach(item => {
+        const targetId = item.getAttribute('data-target');
+        const win = document.getElementById(targetId);
+        if (win && win.style.display !== 'none' && getComputedStyle(win).display !== 'none') {
+            item.classList.add('is-running');
+        } else {
+            item.classList.remove('is-running');
+        }
+    });
+}
+
+function openApp(targetId) {
+    // 300ms launch cursor transition
+    triggerLaunchCursor();
+
+    const targetWin = document.getElementById(targetId);
+    if (!targetWin) return;
+
+    // Open at center only (no scattered), user can move later
+    targetWin.style.display = 'flex';
+    centerWindow(targetWin);
+    bringToFront(targetWin);
+
+    targetWin.classList.add('fade-in');
+    setTimeout(() => targetWin.classList.remove('fade-in'), 300);
+
+    updateDockIndicators();
+}
+
+function makeDraggable(element) {
+    const header = element.querySelector('.window-header') || element;
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let initialLeft = 0, initialTop = 0;
+
+    // Bring to front on click
+    element.addEventListener('mousedown', () => bringToFront(element));
+
+    header.addEventListener('mousedown', dragStart);
+
+    function dragStart(e) {
+        // Prevent drag on close button
+        if (e.target.classList.contains('window-close-btn') || e.target.classList.contains('closebutton')) return;
+        
         e.preventDefault();
+        isDragging = true;
+        bringToFront(element);
 
-        // Get initial mouse position
-        pos3 = e.clientX;
-        pos4 = e.clientY;
+        startX = e.clientX;
+        startY = e.clientY;
 
-        // Store initial element position
         const rect = element.getBoundingClientRect();
-        pos1 = rect.left;
-        pos2 = rect.top;
+        initialLeft = rect.left;
+        initialTop = rect.top;
 
-        // Remove centering transform
-        element.style.transform = "none";
+        // Clean positioning if using right/bottom css
+        element.style.transform = 'none';
+        element.style.right = 'auto';
+        element.style.bottom = 'auto';
+        element.style.left = initialLeft + 'px';
+        element.style.top = initialTop + 'px';
 
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
+        document.addEventListener('mousemove', dragMove);
+        document.addEventListener('mouseup', dragEnd);
     }
 
-    function elementDrag(e) {
-        e = e || window.event;
+    function dragMove(e) {
+        if (!isDragging) return;
         e.preventDefault();
 
-        // Calculate new position
-        const newX = pos1 + (e.clientX - pos3);
-        const newY = pos2 + (e.clientY - pos4);
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
 
-        // Set new position
-        element.style.left = newX + "px";
-        element.style.top = newY + "px";
+        let newX = initialLeft + dx;
+        let newY = initialTop + dy;
+
+        // Keep inside window bounds
+        const winWidth = window.innerWidth;
+        const winHeight = window.innerHeight;
+        const elWidth = element.offsetWidth;
+
+        newX = Math.max(10, Math.min(newX, winWidth - elWidth - 10));
+        newY = Math.max(42, Math.min(newY, winHeight - 60));
+
+        element.style.left = newX + 'px';
+        element.style.top = newY + 'px';
     }
 
-    function closeDragElement() {
-        document.onmouseup = null;
-        document.onmousemove = null;
+    function dragEnd() {
+        isDragging = false;
+        document.removeEventListener('mousemove', dragMove);
+        document.removeEventListener('mouseup', dragEnd);
     }
 }
 
-var welcomeScreen = document.querySelector("#welcome");
-
-function closeWindow(element) {
-    element.style.display = "none";
-}
-
-function openWindow(element) {
-    element.style.display = "flex";
-}
-
-var welcomeScreenClose = document.querySelector("#welcomeclose");
-
-var welcomeScreenOpen = document.querySelector("#welcomeopen");
-
-welcomeScreenClose.addEventListener("click", function () {
-    closeWindow(welcomeScreen);
+// Initialize all windows as draggable
+document.querySelectorAll('.os-window').forEach(win => {
+    makeDraggable(win);
 });
 
-welcomeScreenOpen.addEventListener("click", function () {
-    openWindow(welcomeScreen);
+// Close button handlers
+document.querySelectorAll('.window-close-btn, .closebutton').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetId = btn.getAttribute('data-close');
+        const targetWin = targetId ? document.getElementById(targetId) : btn.closest('.os-window');
+        if (targetWin) {
+            targetWin.style.display = 'none';
+
+            // Specifically handle who-am-i (window-intro): immediately terminate video & iframe audio
+            if (targetWin.id === 'window-intro') {
+                const vid = document.getElementById('intro-video-player');
+                if (vid) {
+                    vid.pause();
+                    vid.currentTime = 0;
+                }
+                const iframe = document.getElementById('intro-x-iframe');
+                if (iframe) {
+                    const currSrc = iframe.src;
+                    iframe.src = '';
+                    setTimeout(() => { iframe.src = currSrc; }, 50);
+                }
+            }
+
+            updateDockIndicators();
+        }
+    });
 });
+
+// macOS Dock click handlers
+document.querySelectorAll('.dock-item').forEach(item => {
+    item.addEventListener('click', () => {
+        const targetId = item.getAttribute('data-target');
+        if (targetId) {
+            openApp(targetId);
+        }
+    });
+});
+
+// Initial Setup: Keep all apps closed except Welcome, open Welcome at center
+document.querySelectorAll('.os-window').forEach(win => {
+    if (win.id === 'window-welcome') {
+        win.style.display = 'flex';
+        centerWindow(win);
+        bringToFront(win);
+    } else {
+        win.style.display = 'none';
+    }
+});
+updateDockIndicators();
+
+// =============================================================================
+// 3. Notes Application Interactivity (Signature 2-Column Vintage Reader)
+// =============================================================================
+const todayDateStr = new Date().toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric'
+});
+
+// Set Scratchpad date to present date
+const scratchpadDateEl = document.getElementById('notes-scratchpad-date');
+if (scratchpadDateEl) {
+    scratchpadDateEl.textContent = todayDateStr;
+}
+
+const notesDatabase = {
+    welcome: {
+        title: "Who I am",
+        image: "OS/Assets/1767941902117.jpg",
+        date: "06/28/2023",
+        html: `<p>I'm Heramb Salunkhe, a builder and product-minded engineer from Chiplun, India. Recently worked as an Intern shipping full-stack systems at <a href="https://autonmis.com" target="_blank" rel="noopener" class="org-mention"><img src="OS/Assets/autonmis.png" class="org-mention-icon" alt="">Autonmis</a>.</p>
+<p>I've bounced through AI agents, link engines, data ops (testing different 3rd party integrations, brand-oriented visualizations), exploring different inference engines, and essentially data pipelines. Not because I couldn't pick a topic, but cause I learn fastest when the thing I'm building has to work for someone else.</p>
+<p>A few rooms left fingerprints: Building community with <a href="https://github.com/hebuildapps" target="_blank" rel="noopener" class="org-mention"><img src="OS/Assets/prismlabs-07.png" class="org-mention-icon" alt="">prismlabs</a>, shipping being youngest in room at <a href="https://starknet.io" target="_blank" rel="noopener" class="org-mention"><img src="OS/Assets/starknet-logo.svg" class="org-mention-icon" alt="">Starknet</a> hackerhouse, and learning leadership through <a href="https://gdg.community.dev/" target="_blank" rel="noopener" class="org-mention"><img src="OS/Assets/emojis/globe.png" class="org-mention-icon" alt="">GDG</a>.</p>
+<p>Outside the editor, I care about going on small trips to go out and touch some <span class="org-mention"><img src="OS/Assets/grass.png" class="org-mention-icon" alt="">grass</span>, long talks with lads, good chai or coffee with some local street food, and spending time with fam.</p>`
+    },
+    blogs: {
+        title: "Published Blogs",
+        image: null,
+        date: "3 posts",
+        html: `<div class="notes-blog-list">
+            <a class="notes-blog-card" href="https://github.com/hebuildapps" target="_blank" rel="noopener">
+                <div class="notes-blog-meta">
+                    <span>2026-04-07</span>
+                    <span>Proposal</span>
+                </div>
+                <h3 class="notes-blog-title">My GSoC 2026 Proposal</h3>
+                <p class="notes-blog-desc">HumanAI Foundation: AI-Powered Behavioral Analysis, Crisis Signal Detection, Funding Intelligence, and Team Communication Processing.</p>
+                <div class="notes-blog-tags">
+                    <span class="notes-blog-tag">GSoC</span>
+                    <span class="notes-blog-tag">AI / NLP</span>
+                    <span class="notes-blog-tag">Signal Processing</span>
+                </div>
+            </a>
+
+            <a class="notes-blog-card" href="https://github.com/hebuildapps" target="_blank" rel="noopener">
+                <div class="notes-blog-meta">
+                    <span>2026-06-20</span>
+                    <span>Systems</span>
+                </div>
+                <h3 class="notes-blog-title">The Context Problem</h3>
+                <p class="notes-blog-desc">Dashboards show what happened. Alerts say something changed. Incidents organize investigation. But explanation is still manual work.</p>
+                <div class="notes-blog-tags">
+                    <span class="notes-blog-tag">Analytics</span>
+                    <span class="notes-blog-tag">Incident Ops</span>
+                    <span class="notes-blog-tag">Agents</span>
+                </div>
+            </a>
+
+            <a class="notes-blog-card" href="https://heramb.bearblog.dev/web3/" target="_blank" rel="noopener">
+                <div class="notes-blog-meta">
+                    <span>2023-11-11</span>
+                    <span>Essay</span>
+                </div>
+                <h3 class="notes-blog-title">Web 3.0, AI, and the Future of the Internet</h3>
+                <p class="notes-blog-desc">An exploration of convergence between decentralized systems, open protocols, and sovereign agentic AI engines.</p>
+                <div class="notes-blog-tags">
+                    <span class="notes-blog-tag">Web3</span>
+                    <span class="notes-blog-tag">AI</span>
+                    <span class="notes-blog-tag">Protocols</span>
+                </div>
+            </a>
+        </div>`
+    },
+    opencv: {
+        title: "Mood Detection Architecture",
+        image: "OS/Assets/photo-collage.jpg",
+        date: "06/28/2023",
+        html: `<p>MoodE utilizes real-time facial expression analysis with OpenCV's Haar Cascade classifier and a custom deep learning emotional valence network.</p>
+<p><strong>Core Emotion Classes:</strong><br>
+• Happy (Warm Amber, 600nm)<br>
+• Sad (Calming Golden Glow, 580nm)<br>
+• Neutral (Soft daylight balanced)<br>
+• Angry / Stressed (Cool Forest Emerald)</p>
+<p>When prolonged fatigue or sadness is detected, the system automatically triggers ambient light transitions and tailored audio frequencies.</p>`
+    },
+    scratchpad: {
+        title: "Hacker Scratchpad",
+        image: null,
+        date: todayDateStr,
+        html: ""
+    }
+};
+
+const notesItems = document.querySelectorAll('.notes-item');
+const notesTitle = document.getElementById('notes-title');
+const notesImage = document.getElementById('notes-image');
+const notesMediaWrapper = document.getElementById('notes-media-wrapper');
+const notesProse = document.getElementById('notes-prose');
+const notesScratchpad = document.getElementById('notes-scratchpad');
+
+// Load saved scratchpad text from localStorage
+const savedScratchpad = localStorage.getItem('moode_notes_scratchpad') || 
+`// MoodE Scratchpad
+// Type your ideas, hackathon logs, or thoughts here.
+`;
+if (notesScratchpad) {
+    notesScratchpad.value = savedScratchpad;
+    notesScratchpad.addEventListener('input', () => {
+        localStorage.setItem('moode_notes_scratchpad', notesScratchpad.value);
+    });
+}
+
+notesItems.forEach(item => {
+    item.addEventListener('click', () => {
+        notesItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+
+        const noteKey = item.getAttribute('data-note');
+        const note = notesDatabase[noteKey];
+        if (!note) return;
+
+        notesTitle.textContent = note.title;
+
+        if (noteKey === 'scratchpad') {
+            notesMediaWrapper.style.display = 'none';
+            notesProse.style.display = 'none';
+            notesScratchpad.style.display = 'block';
+            notesScratchpad.focus();
+        } else {
+            notesScratchpad.style.display = 'none';
+            notesProse.style.display = 'block';
+            notesProse.innerHTML = note.html;
+
+            if (note.image) {
+                notesMediaWrapper.style.display = 'block';
+                notesImage.src = note.image;
+            } else {
+                notesMediaWrapper.style.display = 'none';
+            }
+        }
+    });
+});
+
+// =============================================================================
+// 5. Wallpaper Switcher
+// =============================================================================
+const desktop = document.getElementById('desktop');
+const savedWallpaper = localStorage.getItem('moode_desktop_wall');
+if (desktop) {
+    if (savedWallpaper && !savedWallpaper.includes('sunset-ocean.jpg')) {
+        desktop.style.backgroundImage = `url('${savedWallpaper}')`;
+    } else {
+        desktop.style.backgroundImage = `url('OS/Assets/justin-wolff-Macs-aqy6Ek-unsplash.jpg')`;
+    }
+}
+
+document.querySelectorAll('.wallpaper-thumbnail').forEach(thumb => {
+    thumb.addEventListener('click', () => {
+        const wallUrl = thumb.getAttribute('data-wall');
+        if (desktop && wallUrl) {
+            desktop.style.backgroundImage = `url('${wallUrl}')`;
+            localStorage.setItem('moode_desktop_wall', wallUrl);
+        }
+    });
+});
+
+// =============================================================================
+// 6. X Intro Video Frame & Upward Morphing Iframe
+// =============================================================================
+const windowIntro = document.getElementById('window-intro');
+const introVideoContainer = document.getElementById('intro-video-container');
+const introXContainer = document.getElementById('intro-x-container');
+const elongateBtn = document.getElementById('elongate-toggle-btn');
+const compressBtn = document.getElementById('compress-toggle-btn');
+const introWinTitle = document.getElementById('intro-win-title');
+const introVideoPlayer = document.getElementById('intro-video-player');
+
+if (elongateBtn && windowIntro) {
+    elongateBtn.addEventListener('click', () => {
+        if (introVideoPlayer) introVideoPlayer.pause();
+
+        const rect = windowIntro.getBoundingClientRect();
+        const currentHeight = rect.height;
+        const targetHeight = 520;
+        const heightDiff = targetHeight - currentHeight;
+
+        // Increase height upwards: adjust top coordinate so bottom stays at same position
+        windowIntro.style.top = Math.max(45, (rect.top - heightDiff)) + 'px';
+        windowIntro.style.width = '380px';
+
+        introVideoContainer.style.display = 'none';
+        introXContainer.style.display = 'block';
+        if (introWinTitle) introWinTitle.textContent = 'Post on X';
+        bringToFront(windowIntro);
+    });
+
+    if (compressBtn) {
+        compressBtn.addEventListener('click', () => {
+            const rect = windowIntro.getBoundingClientRect();
+            const currentHeight = rect.height;
+            const targetHeight = 230;
+            const heightDiff = currentHeight - targetHeight;
+
+            windowIntro.style.top = (rect.top + heightDiff) + 'px';
+            windowIntro.style.width = '330px';
+
+            introXContainer.style.display = 'none';
+            introVideoContainer.style.display = 'block';
+            if (introWinTitle) introWinTitle.textContent = 'who-am-i.mp4';
+            if (introVideoPlayer) introVideoPlayer.play().catch(() => {});
+            bringToFront(windowIntro);
+        });
+    }
+}
+
+// =============================================================================
+// 7. Mac Image Viewer (>Club work< with Mini Carousel)
+// =============================================================================
+const clubMainImg = document.getElementById('club-main-img');
+const clubThumbs = document.querySelectorAll('.club-thumb');
+const clubPrevBtn = document.getElementById('club-prev-btn');
+const clubNextBtn = document.getElementById('club-next-btn');
+
+if (clubThumbs.length > 0) {
+    let currentClubIndex = 0;
+    const clubImages = Array.from(clubThumbs).map(t => t.getAttribute('data-src'));
+
+    function setClubImage(index) {
+        if (index < 0) index = clubImages.length - 1;
+        if (index >= clubImages.length) index = 0;
+        currentClubIndex = index;
+
+        if (clubMainImg) {
+            clubMainImg.style.opacity = '0.3';
+            setTimeout(() => {
+                clubMainImg.src = clubImages[currentClubIndex];
+                clubMainImg.style.opacity = '1';
+            }, 120);
+        }
+
+        clubThumbs.forEach((thumb, i) => {
+            thumb.classList.toggle('active', i === currentClubIndex);
+        });
+    }
+
+    clubThumbs.forEach((thumb, i) => {
+        thumb.addEventListener('click', () => setClubImage(i));
+    });
+
+    if (clubPrevBtn) {
+        clubPrevBtn.addEventListener('click', () => setClubImage(currentClubIndex - 1));
+    }
+    if (clubNextBtn) {
+        clubNextBtn.addEventListener('click', () => setClubImage(currentClubIndex + 1));
+    }
+}
+
+// =============================================================================
+// 8. Contact Window Interactive AI Chatbot (Groq + Discord Omnichannel Sync)
+// =============================================================================
+const contactInput = document.getElementById('contact-message-input');
+const contactSendBtn = document.getElementById('contact-send-button');
+const contactChatStream = document.getElementById('contact-chat-stream');
+const contactStarterChips = document.querySelectorAll('.starter-chip');
+const contactModeBadge = document.getElementById('contact-mode-badge');
+const contactModeText = document.getElementById('contact-mode-text');
+
+// Persistent Chat Session ID (uses sessionStorage to match i-201 and isolate tabs)
+function getOrCreateSessionId() {
+    const STORAGE_KEY = 'porto_chat_session_id';
+    let sid = sessionStorage.getItem(STORAGE_KEY) || localStorage.getItem('moode_chat_session_id');
+    if (!sid) {
+        const randomPart = Math.random().toString(36).substring(2, 8);
+        const timestampPart = Date.now().toString(36).slice(-4);
+        sid = `visitor-${randomPart}-${timestampPart}`;
+        sessionStorage.setItem(STORAGE_KEY, sid);
+        localStorage.setItem('moode_chat_session_id', sid);
+    } else {
+        sessionStorage.setItem(STORAGE_KEY, sid);
+        localStorage.setItem('moode_chat_session_id', sid);
+    }
+    return sid;
+}
+
+let chatSessionId = getOrCreateSessionId();
+console.log('[MoodE Chat] Initialized session ID:', chatSessionId);
+
+const chatHistory = [];
+let isChatLoading = false;
+let currentChatMode = 'ai'; // 'ai' or 'human'
+
+// Determine API Base:
+// When running locally, port 5174 provides the CORS proxy that safely communicates with heramb.icu.
+// If the page is hosted on localhost/127.0.0.1 (even on IDE preview ports), route through http://127.0.0.1:5174.
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_BASE = isLocal 
+    ? (window.location.port === '5174' ? '' : 'http://127.0.0.1:5174')
+    : 'https://heramb.icu';
+const CHAT_API_URL = `${API_BASE}/api/chat`;
+const RELAY_API_URL = `${API_BASE}/api/chat/relay`;
+
+
+// Update mode indicator in header (matches i-201 styling: 'Technically Online' stays, color/border/icon changes)
+function setModeBadge(mode) {
+    currentChatMode = mode;
+    const badge = document.getElementById('contact-mode-badge');
+    const text = document.getElementById('contact-mode-text');
+    if (!badge) return;
+    
+    if (mode === 'human') {
+        badge.classList.add('human');
+    } else {
+        badge.classList.remove('human');
+    }
+    if (text) {
+        text.textContent = 'Technically Online';
+    }
+}
+
+// Append message bubbles to chat UI
+function appendChatBubble(role, text) {
+    const stream = document.getElementById('contact-chat-stream');
+    if (!stream) return;
+    const bubble = document.createElement('div');
+    bubble.className = role === 'user' ? 'my_message' : 'thomas_message';
+    bubble.textContent = text;
+    stream.appendChild(bubble);
+    stream.scrollTop = stream.scrollHeight;
+    return bubble;
+}
+
+// Show typing indicator
+function showTypingIndicator() {
+    const stream = document.getElementById('contact-chat-stream');
+    if (!stream) return null;
+    const indicator = document.createElement('div');
+    indicator.className = 'thomas_message bot-typing-container';
+    indicator.innerHTML = '<div class="bot-typing-dots"><span></span><span></span><span></span></div>';
+    stream.appendChild(indicator);
+    stream.scrollTop = stream.scrollHeight;
+    return indicator;
+}
+
+// Poll relay endpoint for operator messages and mode switches (every 1.5 seconds)
+async function pollRelay() {
+    try {
+        const res = await fetch(`${RELAY_API_URL}?sessionId=${encodeURIComponent(chatSessionId)}&t=${Date.now()}`, {
+            cache: 'no-store'
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (data.mode) {
+            setModeBadge(data.mode);
+        }
+
+        if (Array.isArray(data.pendingMessages) && data.pendingMessages.length > 0) {
+            console.log('[MoodE Chat] Received operator messages:', data.pendingMessages);
+            data.pendingMessages.forEach(m => {
+                appendChatBubble('bot', m.content);
+                chatHistory.push({ role: 'assistant', content: m.content });
+            });
+            const typingIndicator = document.querySelector('.bot-typing-container');
+            if (typingIndicator) typingIndicator.remove();
+            isChatLoading = false;
+        }
+    } catch (e) {
+        console.warn('[MoodE Chat] Poll error:', e);
+    }
+}
+
+// Start polling relay every 1.5 seconds
+setInterval(pollRelay, 1500);
+pollRelay();
+
+// Send message
+async function handleSendContactMessage(overrideText) {
+    if (!contactInput || !contactChatStream || isChatLoading) return;
+    const textToSend = (overrideText || contactInput.value).trim();
+    if (!textToSend) return;
+
+    // Reset input
+    if (!overrideText) {
+        contactInput.value = '';
+    }
+
+    // Hide starter chips after first user action
+    const starterChipsContainer = document.getElementById('contact-starter-chips');
+    if (starterChipsContainer) {
+        starterChipsContainer.style.display = 'none';
+    }
+
+    // Append user message
+    appendChatBubble('user', textToSend);
+    chatHistory.push({ role: 'user', content: textToSend });
+    isChatLoading = true;
+
+    // Show typing placeholder
+    const typingIndicator = showTypingIndicator();
+
+    try {
+        // First try the unified omnichannel endpoint at https://heramb.icu/api/chat
+        const res = await fetch(CHAT_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: textToSend,
+                history: chatHistory.slice(-6).map(m => ({
+                    role: m.role === 'user' ? 'user' : 'bot',
+                    content: m.content
+                })),
+                sessionId: chatSessionId,
+                chatMode: currentChatMode
+            })
+        });
+
+        if (res.headers.get('X-Chat-Mode') === 'human' || currentChatMode === 'human') {
+            setModeBadge('human');
+            if (typingIndicator) typingIndicator.remove();
+            isChatLoading = false;
+            return;
+        }
+
+        if (res.ok) {
+            const aiText = await res.text();
+            if (typingIndicator) typingIndicator.remove();
+            if (aiText && aiText !== 'OK_WAITING_FOR_OPERATOR') {
+                appendChatBubble('bot', aiText);
+                chatHistory.push({ role: 'assistant', content: aiText });
+            }
+            isChatLoading = false;
+            return;
+        }
+
+    } catch (err) {
+        console.warn('Network error reaching chat endpoint:', err);
+        if (typingIndicator) typingIndicator.remove();
+        appendChatBubble('bot', "Thanks for reaching out! You can also connect directly via email at salunkheheramb@gmail.com.");
+    } finally {
+        isChatLoading = false;
+    }
+}
+
+if (contactSendBtn && contactInput) {
+    contactSendBtn.addEventListener('click', () => handleSendContactMessage());
+    contactInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSendContactMessage();
+        }
+    });
+}
+
+// Starter chips click handler
+contactStarterChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+        const query = chip.getAttribute('data-query');
+        if (query) {
+            handleSendContactMessage(query);
+        }
+    });
+});
+
+// Initial window centering after layout is ready
+window.addEventListener('DOMContentLoaded', () => {
+    const welcome = document.getElementById('window-welcome');
+    if (welcome) {
+        welcome.style.display = 'flex';
+        centerWindow(welcome);
+        bringToFront(welcome);
+    }
+});
+
+window.addEventListener('load', () => {
+    const welcome = document.getElementById('window-welcome');
+    if (welcome) {
+        centerWindow(welcome);
+    }
+});
+

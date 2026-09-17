@@ -1,62 +1,925 @@
-<!-- main.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>moodE OS | Say Hello to MoodE!</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>moodEOS | Say Hello to MoodE!</title>
+    <link rel="icon" type="image/png" href="OS/Assets/moode_OS.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+
     <link rel="stylesheet" href="main.css">
-    <link rel="icon" type="image/jpeg" href="OS/Assets/moode_OS.png">
 </head>
 
-<body
-    style="font-family: Noto Sans, system-ui, sans-serif; height: 100vh; background-image: url(OS/Assets/wall.gif); background-size: cover; background-repeat: no-repeat; margin: 0px;">
-    <div id="navbar" class="navbar"
-        style="position: absolute; width: 100%; display: flex; backdrop-filter: blur(10px); background-color: rgba(0, 0, 0, 0.125); color: #fff; justify-content: space-between; gap: 32px;">
-        <p
-            style="margin-left: 16px; font-weight: 700; background-color: rgba(256, 256, 256, 0.125); padding: 4px 12px; border-radius: 16px;">
-            moodEOS
-        </p>
-        <p
-            style="margin-left: 16px; background-color: rgba(256, 256, 256, 0.25); padding: 4px 12px; border-radius: 16px;">
-            ☀️ Keep Hustling! ☁️
-        </p>
-        <p id="timeElement"
-            style="margin-right: 16px; background-color: rgba(256, 256, 256, 0.125); padding: 4px 12px; border-radius: 16px;">
-            1/10/2025 5:00 AM
-        </p>
-    </div>
-    <div>
-        <div id="desktopApps" style="padding-top: 500px; padding-left: 16px;">
-            <div style="text-align: center; padding: 16px; filter: drop-shadow(0 0 8px black); width: fit-content">
-                <img class="icons" src="OS/Assets/notepad_retrox86.png" alt="welcome">
-                <p class="icon-name">Welcome</p>
-            </div>
-            <div id="desktopApps" style="padding-top: 4px; padding-left: 0px;">
-                <div style="text-align: center; padding: 16px; filter: drop-shadow(0 0 8px black); width: fit-content">
-                    <img class="icons" src="OS/Assets/moode_OS.png" alt="welcome">
-                    <p class="icon-name">Bootloader</p>
+<body>
+    <div id="desktop">
+        <!-- Ambient mood lighting overlay -->
+        <div id="mood-overlay"></div>
+
+        <!-- Top Navigation Bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <div class="topbar-brand" id="brand-menu-btn">
+                    <span>moodEOS</span>
                 </div>
             </div>
-            <div id="welcome" class="welcome">  
-                <div id="welcomeheader"
-                class="welcomeheader">
-                <div id="welcomeclose" class="closebutton   "></div>
-                <p style="margin: 0px; color: #fff; font-weight: 500">Welcome</p>
-                
+
+            <div class="topbar-center">
+                <div class="mood-status-pill" id="mood-pill">
+                    <span id="mood-status-text"><img class="apple-emoji"
+                            src="OS/Assets/emojis/sun_behind_small_cloud.png" alt="🌤️"> Always Learning <img
+                            class="apple-emoji" src="OS/Assets/emojis/cloud.png" alt="☁️"></span>
+                </div>
             </div>
-    
-                    <div class="welcome-content">
-                        <img style="width: 64px; height: 64px; border-radius: 32px; object-fit: cover"
-                            src="OS/Assets/moode_OS.png" />
-                        <h1 style="margin: 4px;">moodEOS</h1>
-                        <p style="margin: 0px;">
-                            <dfn>moodE OS</dfn> is a feature-limited <abbr title="Operating System">OS</abbr> to link your
-                            <br />
-                            <code>real-life</code> and <code class="code2">digital-life</code> together!
-                        </p>
-                    </div>
+
+            <div class="topbar-right">
+                <div class="clock-pill" id="timeElement">7/23/2023, 2:46:43 PM</div>
             </div>
-            <script src="script.js"></script>
+        </header>
+
+        <!-- Quick Mood Selector Menu -->
+        <div class="mood-menu" id="mood-menu">
+            <div class="mood-option" data-mood="learning" data-tint="rgba(0,0,0,0)">
+                <img class="apple-emoji-lg" src="OS/Assets/emojis/sun_behind_small_cloud.png" alt="🌤️">
+                <span>Always Learning</span>
+            </div>
+            <div class="mood-option" data-mood="hustling" data-tint="rgba(255, 180, 0, 0.12)">
+                <img class="apple-emoji-lg" src="OS/Assets/emojis/sun.png" alt="☀️">
+                <span>Keep Hustling!</span>
+            </div>
+            <div class="mood-option" data-mood="focused" data-tint="rgba(56, 189, 248, 0.14)">
+                <img class="apple-emoji-lg" src="OS/Assets/emojis/headphones.png" alt="🎧">
+                <span>Deep Focus Mode</span>
+            </div>
+            <div class="mood-option" data-mood="calm" data-tint="rgba(34, 197, 94, 0.12)">
+                <img class="apple-emoji-lg" src="OS/Assets/emojis/herb.png" alt="🌿">
+                <span>Serene & Relaxed</span>
+            </div>
+            <div class="mood-option" data-mood="night" data-tint="rgba(147, 51, 234, 0.16)">
+                <img class="apple-emoji-lg" src="OS/Assets/emojis/crescent_moon.png" alt="🌙">
+                <span>Late Night Hacker</span>
+            </div>
         </div>
+
+        <!-- macOS Style App Dock -->
+        <nav class="macos-dock" id="macos-dock" aria-label="macOS Dock">
+            <div class="dock-container">
+                <div class="dock-item" data-target="window-welcome" data-name="Welcome">
+                    <div class="dock-tooltip">Welcome</div>
+                    <img class="dock-icon-img" src="OS/Assets/moode_OS.png" alt="Welcome">
+                    <span class="dock-dot"></span>
+                </div>
+
+                <div class="dock-item" data-target="window-notes" data-name="Notes">
+                    <div class="dock-tooltip">Notes</div>
+                    <img class="dock-icon-img" src="OS/Assets/pebble/pebble-notes.svg" alt="Notes">
+                    <span class="dock-dot"></span>
+                </div>
+
+                <div class="dock-item" data-target="window-contact" data-name="Contact">
+                    <div class="dock-tooltip">Contact</div>
+                    <img class="dock-icon-img" src="OS/Assets/pebble/pebble-contact.svg" alt="Contact">
+                    <span class="dock-dot"></span>
+                </div>
+
+                <div class="dock-item" data-target="window-projects" data-name="Projects">
+                    <div class="dock-tooltip">Projects</div>
+                    <img class="dock-icon-img" src="OS/Assets/pebble/pebble-projects.svg" alt="Projects">
+                    <span class="dock-dot"></span>
+                </div>
+
+                <div class="dock-item" data-target="window-carolina" data-name="Hackathons">
+                    <div class="dock-tooltip">Hackathons</div>
+                    <img class="dock-icon-img" src="OS/Assets/pebble/pebble-xcode.svg" alt="Hackathons">
+                    <span class="dock-dot"></span>
+                </div>
+
+                <div class="dock-item" data-target="window-intro" data-name="who-am-i">
+                    <div class="dock-tooltip">who-am-i</div>
+                    <img class="dock-icon-img" src="OS/Assets/pebble/pebble-whoami.svg" alt="who-am-i">
+                    <span class="dock-dot"></span>
+                </div>
+
+                <div class="dock-item" data-target="window-club" data-name="Club work">
+                    <div class="dock-tooltip">Club work</div>
+                    <img class="dock-icon-img" src="OS/Assets/pebble/pebble-club.svg" alt="Club work">
+                    <span class="dock-dot"></span>
+                </div>
+
+                <div class="dock-item" data-target="window-photo" data-name="Photo">
+                    <div class="dock-tooltip">Photo</div>
+                    <img class="dock-icon-img" src="OS/Assets/pebble/pebble-photo.svg" alt="Photo">
+                    <span class="dock-dot"></span>
+                </div>
+
+                <div class="dock-separator"></div>
+
+                <div class="dock-item" data-target="window-wallpapers" data-name="Themes">
+                    <div class="dock-tooltip">Themes</div>
+                    <img class="dock-icon-img" src="OS/Assets/pebble/pebble-wallpaper.svg" alt="Themes">
+                    <span class="dock-dot"></span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- =================================================================
+             WINDOW 1: Welcome Window
+             ================================================================= -->
+        <div id="window-welcome" class="os-window active">
+            <div class="window-header">
+                <div class="window-close-btn" data-close="window-welcome"></div>
+                <span class="window-title">Welcome</span>
+            </div>
+            <div class="window-body">
+                <div class="welcome-inner">
+                    <div class="welcome-profile-row">
+                        <img class="welcome-avatar" src="OS/Assets/avatar_sharp.png" alt="Profile Avatar">
+                    </div>
+                    <h1 class="welcome-title">moodEOS</h1>
+                    <p class="welcome-tagline">
+                        <em>moodEOS</em> is a feature-limited <code>OS</code> to link your <code>real-life</code> and
+                        <code class="code-digital">digital-life</code> together!
+                    </p>
+                    <div class="welcome-tags">
+                        <span class="tech-tag"><img class="apple-emoji" src="OS/Assets/emojis/zap.png" alt="⚡"> Arduino
+                            Uno R3</span>
+                        <span class="tech-tag"><img class="apple-emoji" src="OS/Assets/emojis/eye.png" alt="👁️"> OpenCV
+                            Haar Cascade</span>
+                        <span class="tech-tag"><img class="apple-emoji" src="OS/Assets/emojis/bulb.png" alt="💡"> WS2812
+                            LEDs</span>
+                        <span class="tech-tag"><img class="apple-emoji" src="OS/Assets/emojis/blossom.png" alt="🌸">
+                            Fragrance AI</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================
+             WINDOW 2: Notes - Welcome Window (Signature 2-Column Hacker Notes)
+             ================================================================= -->
+        <div id="window-notes" class="os-window">
+            <div class="window-header">
+                <div class="window-close-btn" data-close="window-notes"></div>
+                <span class="window-title">Notes - Welcome</span>
+            </div>
+            <div class="window-body">
+                <div class="notes-container">
+                    <!-- Left Sidebar -->
+                    <div class="notes-sidebar">
+                        <div class="notes-item active" data-note="welcome">
+                            <h4 class="notes-item-title">Welcome</h4>
+                            <p class="notes-item-date">06/28/2023</p>
+                        </div>
+                        <div class="notes-item" data-note="blogs">
+                            <h4 class="notes-item-title">Blogs</h4>
+                            <p class="notes-item-date">3 posts</p>
+                        </div>
+                        <div class="notes-item" data-note="opencv">
+                            <h4 class="notes-item-title">Mood Detection</h4>
+                            <p class="notes-item-date">06/28/2023</p>
+                        </div>
+                        <div class="notes-item" data-note="scratchpad">
+                            <h4 class="notes-item-title">Scratchpad</h4>
+                            <p class="notes-item-date" id="notes-scratchpad-date">Present</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Content Area -->
+                    <div class="notes-content-area" id="notes-content-panel">
+                        <h2 class="notes-headline" id="notes-title">Who I am</h2>
+                        <div class="notes-media-wrapper" id="notes-media-wrapper">
+                            <img class="notes-image" id="notes-image" src="OS/Assets/1767941902117.jpg" alt="Heramb">
+                        </div>
+                        <div class="notes-prose" id="notes-prose">
+                            <p>I'm Heramb Salunkhe, a builder and product-minded engineer from Chiplun, India. Recently
+                                worked as an Intern shipping full-stack systems at <a href="https://autonmis.com"
+                                    target="_blank" rel="noopener" class="org-mention"><img src="OS/Assets/autonmis.png"
+                                        class="org-mention-icon" alt="">Autonmis</a>.</p>
+                            <p>I've bounced through AI agents, link engines, data ops (testing different 3rd party
+                                integrations, brand-oriented visualizations), exploring different inference engines, and
+                                essentially data pipelines. Not because I couldn't pick a topic, but cause I learn
+                                fastest when the thing I'm building has to work for someone else.</p>
+                            <p>A few rooms left fingerprints: Building community with <a
+                                    href="https://github.com/hebuildapps" target="_blank" rel="noopener"
+                                    class="org-mention"><img src="OS/Assets/prismlabs-07.png" class="org-mention-icon"
+                                        alt="">prismlabs</a>, shipping being youngest in room at <a
+                                    href="https://starknet.io" target="_blank" rel="noopener" class="org-mention"><img
+                                        src="OS/Assets/starknet-logo.svg" class="org-mention-icon" alt="">Starknet</a>
+                                hackerhouse, and learning leadership through <a href="https://gdg.community.dev/"
+                                    target="_blank" rel="noopener" class="org-mention"><img
+                                        src="OS/Assets/emojis/globe.png" class="org-mention-icon" alt="">GDG</a>.</p>
+                            <p>Outside the editor, I care about going on small trips to go out and touch some <span
+                                    class="org-mention"><img src="OS/Assets/grass.png" class="org-mention-icon"
+                                        alt="">grass</span>, long talks with lads, good chai or coffee with some local
+                                street food, and spending time with fam.</p>
+                        </div>
+
+                        <textarea class="notes-scratchpad" id="notes-scratchpad" style="display: none;"
+                            placeholder="Type your notes here... They will be preserved automatically."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================
+             WINDOW 3: Photo Collage Window
+             ================================================================= -->
+        <div id="window-photo" class="os-window">
+            <div class="window-header">
+                <div class="window-close-btn" data-close="window-photo"></div>
+                <span class="window-title">Photo</span>
+            </div>
+            <div class="window-body">
+                <div class="photo-collage-wrapper">
+                    <img class="photo-collage-img" src="OS/Assets/photo-collage.jpg" alt="Photo Collage">
+
+                    <!-- Interactive Pulsing Pins with Tooltips -->
+                    <div class="photo-pin" style="top: 24%; left: 16%;">
+                        <div class="pin-tooltip"><img class="apple-emoji" src="OS/Assets/emojis/trophy.png" alt="🏆">
+                            Best IoT Innovation Hack</div>
+                    </div>
+                    <div class="photo-pin" style="top: 22%; left: 78%;">
+                        <div class="pin-tooltip"><img class="apple-emoji" src="OS/Assets/emojis/zap.png" alt="⚡">
+                            Soldering WS2812 Controller</div>
+                    </div>
+                    <div class="photo-pin" style="top: 54%; left: 24%;">
+                        <div class="pin-tooltip"><img class="apple-emoji" src="OS/Assets/emojis/robot.png" alt="🤖">
+                            OpenCV Face & Mood Detection</div>
+                    </div>
+                    <div class="photo-pin" style="top: 50%; left: 72%;">
+                        <div class="pin-tooltip"><img class="apple-emoji" src="OS/Assets/emojis/bulb.png" alt="💡"> Live
+                            Project Demo Presentation</div>
+                    </div>
+                    <div class="photo-pin" style="top: 82%; left: 88%;">
+                        <div class="pin-tooltip"><img class="apple-emoji" src="OS/Assets/emojis/party.png" alt="🎉">
+                            MoodE OS Builders Team</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================
+             WINDOW 4: HackMITWPU Hackathon Window
+             ================================================================= -->
+        <div id="window-carolina" class="os-window">
+            <div class="window-header">
+                <div class="window-close-btn" data-close="window-carolina"></div>
+                <span class="window-title">HackMITWPU</span>
+            </div>
+            <div class="window-body">
+                <div class="carolina-card">
+                    <img class="carolina-banner" src="OS/Assets/1788034283914.jpg"
+                        style="height: 140px; object-fit: cover;" alt="Team Winning on Stage">
+                    <div class="carolina-logo-title">
+                        <img class="carolina-icon" src="OS/Assets/moode_OS.png" alt="Logo">
+                        <div>
+                            <h3 class="carolina-name">HackMITWPU</h3>
+                        </div>
+                    </div>
+                    <p class="carolina-desc">
+                        Team winning photo clicked on stage holding trophies &amp; certificates of excellence.
+                        <br><br>
+                        HackMITWPU is a flagship national hackathon celebrating student innovation and high-impact
+                        engineering.
+                    </p>
+                    <button class="carolina-btn" id="carolina-cta-btn"
+                        onclick="alert('Launching HackMITWPU Highlights!')">
+                        Watch Highlights
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================
+             WINDOW 5: Introduction Video Frame / X Iframe Morph
+             ================================================================= -->
+        <div id="window-intro" class="os-window">
+            <div class="window-header">
+                <div class="window-close-btn" data-close="window-intro"></div>
+                <span class="window-title" id="intro-win-title">who-am-i.mp4</span>
+            </div>
+            <div class="window-body">
+                <!-- State 1: Video Frame with Eye count and Elongate Button -->
+                <div id="intro-video-container" class="intro-video-card">
+                    <video id="intro-video-player" class="intro-video-player" src="OS/Assets/who-am-i.mp4"
+                        poster="OS/Assets/who-am-i-thumb.jpg" loop playsinline autoplay muted></video>
+
+                    <div class="intro-overlay-controls">
+                        <div class="intro-views-group">
+                            <svg class="eye-svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <span class="views-text">2.5k</span>
+                        </div>
+                        <button id="elongate-toggle-btn" class="elongate-btn">
+                            <svg class="elongate-svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <polyline points="9 21 3 21 3 15"></polyline>
+                                <line x1="21" y1="3" x2="14" y2="10"></line>
+                                <line x1="3" y1="21" x2="10" y2="14"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- State 2: Quick X Iframe Morph (Upward Expanded) -->
+                <div id="intro-x-container" class="intro-x-card" style="display: none;">
+                    <div class="intro-x-topbar">
+                        <span class="intro-x-label">Post on X (@hebuildapps)</span>
+                        <button id="compress-toggle-btn" class="compress-btn">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="4 14 10 14 10 20"></polyline>
+                                <polyline points="20 10 14 10 14 4"></polyline>
+                                <line x1="14" y1="10" x2="21" y2="3"></line>
+                                <line x1="3" y1="21" x2="10" y2="14"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <iframe id="intro-x-iframe"
+                        src="https://platform.twitter.com/embed/Tweet.html?id=1979845329169305797&theme=dark"
+                        width="100%" height="450" frameborder="0" scrolling="no" loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================
+             WINDOW 6: Mac Image Viewer (>Club work< with Cute Mini Carousel)
+             ================================================================= -->
+        <div id="window-club" class="os-window">
+            <div class="window-header">
+                <div class="window-close-btn" data-close="window-club"></div>
+                <span class="window-title">&gt;Club work&lt;</span>
+            </div>
+            <div class="window-body">
+                <div class="club-viewer-card">
+                    <div class="club-viewer-stage">
+                        <img id="club-main-img" class="club-main-img" src="OS/Assets/1767941938675.jpg" alt="Club work">
+                    </div>
+                    <div class="club-mini-carousel">
+                        <button class="club-nav-arrow" id="club-prev-btn">‹</button>
+                        <div class="club-thumbs-row">
+                            <img class="club-thumb active" data-src="OS/Assets/1767941938675.jpg"
+                                src="OS/Assets/1767941938675.jpg" alt="Campus Group Photo">
+                            <img class="club-thumb" data-src="OS/Assets/1767941902117.jpg"
+                                src="OS/Assets/1767941902117.jpg" alt="Workshop Mentoring">
+                        </div>
+                        <button class="club-nav-arrow" id="club-next-btn">›</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================
+             WINDOW 7: Contact / Message Heramb
+             ================================================================= -->
+        <div id="window-contact" class="os-window contact-window">
+            <div class="window-header">
+                <div class="window-close-btn" data-close="window-contact"></div>
+                <span class="window-title">Message Heramb</span>
+            </div>
+            <div class="window-body">
+                <div class="contact-card">
+                    <div class="contact-header-info">
+                        <span style="font-size: 11.5px; color: #6b7280; font-weight: 500;">Heramb Salunkhe</span>
+                        <div class="chat-mode-badge" id="contact-mode-badge">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 256 256" class="chat-mode-icon" id="contact-mode-icon">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <path d="M232,128c0,12.51-17.82,21.95-22.68,33.69-4.68,11.32,1.42,30.64-7.78,39.85s-28.53,3.1-39.85,7.78C150,214.18,140.5,232,128,232s-22-17.82-33.69-22.68c-11.32-4.68-30.65,1.42-39.85-7.78s-3.1-28.53-7.78-39.85C41.82,150,24,140.5,24,128s17.82-22,22.68-33.69C51.36,83,45.26,63.66,54.46,54.46S83,51.36,94.31,46.68C106.05,41.82,115.5,24,128,24S150,41.82,161.69,46.68c11.32,4.68,30.65-1.42,39.85,7.78s3.1,28.53,7.78,39.85C214.18,106.05,232,115.5,232,128Z" opacity="0.2"></path>
+                                <path d="M225.86,102.82c-3.77-3.94-7.67-8-9.14-11.57-1.36-3.27-1.44-8.69-1.52-13.94-.15-9.76-.31-20.82-8-28.51s-18.75-7.85-28.51-8c-5.25-.08-10.67-.16-13.94-1.52-3.56-1.47-7.63-5.37-11.57-9.14C146.28,23.51,138.44,16,128,16s-18.27,7.51-25.18,14.14c-3.94,3.77-8,7.67-11.57-9.14C88,40.64,82.56,40.72,77.31,40.8c-9.76.15-20.82.31-28.51,8S41,67.55,40.8,77.31c-.08,5.25-.16,10.67-1.52,13.94-1.47,3.56-5.37,7.63-9.14,11.57C23.51,109.72,16,117.56,16,128s7.51,18.27,14.14,25.18c3.77,3.94,7.67,8,9.14,11.57,1.36,3.27,1.44,8.69,1.52,13.94.15,9.76.31,20.82,8,28.51s18.75,7.85,28.51,8c5.25.08,10.67.16,13.94,1.52,3.56,1.47,7.63,5.37,11.57,9.14C109.72,232.49,117.56,240,128,240s18.27-7.51,25.18-14.14c3.94-3.77,8-7.67,11.57-9.14,3.27-1.36,8.69-1.44,13.94-1.52,9.76-.15,20.82-.31,28.51-8s7.85-18.75,8-28.51c.08-5.25.16-10.67,1.52-13.94,1.47-3.56,5.37-7.63,9.14-11.57C232.49,146.28,240,138.44,240,128S232.49,109.73,225.86,102.82Zm-11.55,39.29c-4.79,5-9.75,10.17-12.38,16.52-2.52,6.1-2.63,13.07-2.73,19.82-.1,7-.21,14.33-3.32,17.43s-10.39,3.22-17.43,3.32c-6.75.1-13.72.21-19.82,2.73-6.35,2.63-11.52,7.59-16.52,12.38S132,224,128,224s-9.15-4.92-14.11-9.69-10.17-9.75-16.52-12.38c-6.1-2.52-13.07-2.63-19.82-2.73-7-.1-14.33-.21-17.43-3.32s-3.22-10.39-3.32-17.43c-.1-6.75-.21-13.72-2.73-19.82-2.63-6.35-7.59-11.52-12.38-16.52S32,132,32,128s4.92-9.15,9.69-14.11,9.75-10.17,12.38-16.52c2.52-6.1,2.63-13.07,2.73-19.82.1-7,.21-14.33,3.32-17.43S70.51,56.9,77.55,56.8c6.75-.1,13.72-.21,19.82-2.73,6.35-2.63,11.52-7.59,16.52-12.38S124,32,128,32s9.15,4.92,14.11,9.69,10.17,9.75,16.52,12.38c6.1,2.52,13.07,2.63,19.82,2.73,7,.1,14.33.21,17.43,3.32s3.22,10.39,3.32,17.43c.1,6.75.21,13.72,2.73,19.82,2.63,6.35,7.59,11.52,12.38,16.52S224,124,224,128,219.08,137.15,214.31,142.11ZM140,180a12,12,0,1,1-12-12A12,12,0,0,1,140,180Zm28-72c0,17.38-13.76,31.93-32,35.28V144a8,8,0,0,1-16,0v-8a8,8,0,0,1,8-8c13.23,0,24-9,24-20s-10.77-20-24-20-24,9-24,20v4a8,8,0,0,1-16,0v-4c0-19.85,17.94-36,40-36S168,88.15,168,108Z"></path>
+                            </svg>
+                            <span id="contact-mode-text">Technically Online</span>
+                        </div>
+                    </div>
+                    <div class="chat-stream" id="contact-chat-stream">
+                        <div class="thomas_message">Hey there, welcome to my inbox!</div>
+                        <img class="chat-inbox-img" src="OS/Assets/1000002794.png" alt="Heramb Salunkhe">
+                        <div class="thomas_message">You can send texts here &amp; they'll ping on my phone instantly.
+                        </div>
+                        <div class="thomas_message">
+                            Feel free to also send me an email at <a href="mailto:salunkheheramb@gmail.com"
+                                class="purple-contact-link">salunkheheramb@gmail.com</a>
+                        </div>
+                    </div>
+                    <!-- Starter Quick Prompts -->
+                    <div class="contact-starter-chips" id="contact-starter-chips">
+                        <button class="starter-chip" data-query="Tell me about your background and key wins.">Know more
+                            about me</button>
+                        <button class="starter-chip" data-query="What is your complete technical stack?">Tech
+                            stack</button>
+                        <button class="starter-chip" data-query="I want to book a call with you. How do I do that?">Book
+                            a call</button>
+                    </div>
+                    <div class="contact-input-row">
+                        <input type="text" id="contact-message-input" class="contact-input-field"
+                            placeholder="Type your message..." />
+                        <button type="button" id="contact-send-button" class="contact-send-action">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================
+             WINDOW 8: Projects Directory (Exact Clone from Reference)
+             ================================================================= -->
+        <div id="window-projects" class="os-window projects-window">
+            <div class="window-header">
+                <div class="window-close-btn" data-close="window-projects"></div>
+                <span class="window-title">Projects</span>
+            </div>
+            <div class="window-body">
+                <div class="projects-card">
+                    <div class="projects-scroll-area" id="projects-container">
+                        <!-- okl.ink -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/projects/oklink-mascot.png" alt="okl.ink">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">okl.ink</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">SaaS</span><span
+                                                class="project-tag-pill">Fullstack</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2026</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">A builder-centric platform for creating beautiful
+                                link-in-bio pages, branded short links, QR codes, and powerful URL management.</p>
+                            <div class="project-links-row">
+                                <a class="project-link-btn" href="https://www.okl.ink" target="_blank"
+                                    rel="noopener">Website</a>
+                            </div>
+                        </div>
+
+                        <!-- Archyve -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/archyve-logo.svg" alt="Archyve">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">Archyve</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">AI-ML</span><span
+                                                class="project-tag-pill">Fullstack</span><span
+                                                class="project-tag-pill">Browser Extension</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2026</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">An AI-powered research intelligence platform that
+                                transforms research papers into structured, validated intelligence.</p>
+                            <div class="project-links-row">
+                                <a class="project-link-btn" href="https://archyve.xyz" target="_blank"
+                                    rel="noopener">Website</a>
+
+                                <a class="project-link-btn" href="https://dub.sh/mcsft-ois" target="_blank"
+                                    rel="noopener">Browser Extension</a>
+                            </div>
+                        </div>
+
+                        <!-- nemo os -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/projects/nemo-mascot-og.svg" alt="nemo os">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">nemo os</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">Fullstack</span><span
+                                                class="project-tag-pill">SaaS</span><span
+                                                class="project-tag-pill">LLM</span><span
+                                                class="project-tag-pill">Python</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2026</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">Gamified placement preparation OS with adaptive tasks
+                                and AI-generated validation.</p>
+                            <div class="project-links-row">
+                                <a class="project-link-btn" href="https://nemo-os.vercel.app" target="_blank"
+                                    rel="noopener">Website</a>
+
+                                <a class="project-link-btn" href="https://devpost.com/software/nemo-os" target="_blank"
+                                    rel="noopener">Devpost Submission</a>
+                            </div>
+
+                        </div>
+
+                        <!-- flocii -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg" alt="Lock-In">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">flocii</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">Fullstack</span><span
+                                                class="project-tag-pill">Electron</span><span
+                                                class="project-tag-pill">Side-Project</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2026</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">Editorial-grade deep work protocol & zen focus
+                                environment with procedural audio soundscapes..</p>
+                            <div class="project-links-row">
+                                <a class="project-link-btn" href="https://flocii.heramb.icu/" target="_blank"
+                                    rel="noopener">Live App</a>
+                                <a class="project-link-btn secondary" href="https://github.com/hebuildapps/flocii"
+                                    target="_blank" rel="noopener">GitHub Repo</a>
+                            </div>
+                        </div>
+
+                        <!-- Expense Tracker -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg"
+                                    alt="Expense Tracker">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">Expense Tracker</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">TypeScript</span><span
+                                                class="project-tag-pill">Next.js</span><span
+                                                class="project-tag-pill">Fullstack</span><span
+                                                class="project-tag-pill">SaaS</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2026</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">Role-based expense management platform with approvals
+                                and policy governance.</p>
+                            <div class="project-links-row">
+                                <a class="project-link-btn" href="https://expense-os-pi.vercel.app/" target="_blank"
+                                    rel="noopener">Live App</a>
+                            </div>
+                        </div>
+
+                        <!-- Placement Analytics Dashboard -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg"
+                                    alt="Placement Analytics Dashboard">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">Placement Analytics Dashboard</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">SaaS</span><span
+                                                class="project-tag-pill">Fullstack</span><span
+                                                class="project-tag-pill">Data Visualization</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2025</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">Placement data visualizer with role-based access and
+                                analytics dashboards.</p>
+                            <div class="project-links-row">
+                                <a class="project-link-btn" href="https://placement-admin.vercel.app" target="_blank"
+                                    rel="noopener">Live Site</a>
+                                <a class="project-link-btn secondary"
+                                    href="https://github.com/hebuildapps/Placement-Admin" target="_blank"
+                                    rel="noopener">GitHub Repo</a>
+                            </div>
+                        </div>
+
+                        <!-- MeTTaPay -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg" alt="MeTTaPay">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">MeTTaPay</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">Agentic AI</span><span
+                                                class="project-tag-pill">Python</span><span
+                                                class="project-tag-pill">Knowledge Graph</span><span
+                                                class="project-tag-pill">ENS</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2025</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">Non-custodial AI copilot for crypto payments built at
+                                ETHGlobal New Delhi.</p>
+                            <div class="project-links-row">
+                                <a class="project-link-btn secondary" href="https://github.com/hebuildapps/MeTTaPay"
+                                    target="_blank" rel="noopener">GitHub Repo</a>
+                            </div>
+                        </div>
+
+                        <!-- Team Communication & Audio Enhancement -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg"
+                                    alt="Team Communication & Audio Enhancement">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">Team Communication & Audio Enhancement</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">Fullstack</span><span
+                                                class="project-tag-pill">Python</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2026</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">Research pipeline to evaluate team communication
+                                datasets and enhance noisy meeting audio using spectral gating, bandpass filtering, and
+                                voice activity detection.</p>
+
+                        </div>
+
+                        <!-- ISSR3 A/B Trust Experiment -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg"
+                                    alt="ISSR3 A/B Trust Experiment">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">ISSR3 A/B Trust Experiment</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">Research</span><span
+                                                class="project-tag-pill">AI/ML</span><span
+                                                class="project-tag-pill">Python</span><span
+                                                class="project-tag-pill">React</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2026</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">Controlled experiment on AI recommendation framing and
+                                user trust behavior.</p>
+                            <div class="project-links-row">
+                                <a class="project-link-btn" href="https://trust-eval.vercel.app/" target="_blank"
+                                    rel="noopener">Live Site</a>
+                                <a class="project-link-btn secondary"
+                                    href="https://github.com/hebuildapps/GSoC-2026-trust-experiment" target="_blank"
+                                    rel="noopener">GitHub Repo</a>
+                            </div>
+                        </div>
+
+                        <!-- AutoSubs -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg" alt="AutoSubs">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">AutoSubs</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">Python</span><span
+                                                class="project-tag-pill">Openai</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2025</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">Desktop tool to auto-generate and style captions with
+                                Whisper.</p>
+                            <div class="project-links-row">
+                                <a class="project-link-btn secondary" href="https://dub.sh/autosubs-git" target="_blank"
+                                    rel="noopener">GitHub Repo</a>
+                            </div>
+                        </div>
+
+                        <!-- MoodE OS -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg" alt="MoodE OS">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">MoodE OS</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">IOT</span><span
+                                                class="project-tag-pill">Fullstack</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2024</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">Real-time room automation with low-latency control and
+                                mood-driven orchestration.</p>
+                            <div class="project-links-row">
+                                <a class="project-link-btn" href="https://dub.sh/moode" target="_blank"
+                                    rel="noopener">Project Site</a>
+                            </div>
+                        </div>
+
+                        <!-- Lernix -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg" alt="Lernix">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">Lernix</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">ERP</span><span
+                                                class="project-tag-pill">SaaS</span><span
+                                                class="project-tag-pill">Fullstack</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2024</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">College ERP with session-based QR attendance and
+                                anti-proxy verification.</p>
+                            <div class="project-links-row">
+                                <a class="project-link-btn secondary" href="https://github.com/hebuildapps/Lernix"
+                                    target="_blank" rel="noopener">GitHub Repo</a>
+                            </div>
+                        </div>
+
+
+                        <!-- Neurobay -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg" alt="Neurobay">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">Neurobay</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">Fullstack</span><span
+                                                class="project-tag-pill">SaaS</span><span
+                                                class="project-tag-pill">Side-Project</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2025</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">Prototype marketplace for ML models, winner at
+                                HackMITWPU 2025.</p>
+
+                        </div>
+
+                        <!-- ml0 -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg" alt="ml0">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">ml0</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">Python</span><span
+                                                class="project-tag-pill">Fullstack</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2024</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">ML educational microsite with visualizations and
+                                equation rendering.</p>
+                            <div class="project-links-row">
+                                <a class="project-link-btn" href="https://ml0.heramb.icu/" target="_blank"
+                                    rel="noopener">Live Site</a>
+                            </div>
+                        </div>
+
+                        <!-- Crop-Prediction Dashboard -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg"
+                                    alt="Crop-Prediction Dashboard">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">Crop-Prediction Dashboard</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">Power BI</span><span
+                                                class="project-tag-pill">Python</span><span
+                                                class="project-tag-pill">XGBoost</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2025</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">Crop-growth dashboard using XGBoost with Power BI
+                                visualizations and a natural-language Q&A agent.</p>
+
+                        </div>
+
+                        <!-- Hand Gesture Automation Glove -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg"
+                                    alt="Hand Gesture Automation Glove">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">Hand Gesture Automation Glove</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">IOT</span><span
+                                                class="project-tag-pill">MPU6050</span><span
+                                                class="project-tag-pill">Embedded C</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2024</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">Wearable glove hardware to automate actions and hotkeys
+                                using gesture recognition.</p>
+                            <div class="project-links-row">
+                                <a class="project-link-btn secondary"
+                                    href="https://github.com/hebuildapps/Hand-gesture-based-automation" target="_blank"
+                                    rel="noopener">GitHub Repo</a>
+                            </div>
+                        </div>
+
+                        <!-- Room-based Automation System -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg"
+                                    alt="Room-based Automation System">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">Room-based Automation System</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">IOT</span><span
+                                                class="project-tag-pill">Embedded C</span><span
+                                                class="project-tag-pill">Hardware</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2024</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">Networked home automation prototype controlling
+                                appliances via Blynk API and microcontrollers.</p>
+                            <div class="project-links-row">
+                                <a class="project-link-btn secondary"
+                                    href="https://github.com/hebuildapps/MoodE-development" target="_blank"
+                                    rel="noopener">GitHub Repo</a>
+                            </div>
+                        </div>
+
+                        <!-- Audio Enhancement System -->
+                        <div class="project-item-card">
+                            <div class="project-heading-row">
+                                <img class="project-icon-img" src="OS/Assets/pebble/pebble-xcode.svg"
+                                    alt="Audio Enhancement System">
+                                <div class="project-title-row">
+                                    <div>
+                                        <h4 class="project-title-text">Audio Enhancement System</h4>
+                                        <div class="project-tags-row">
+                                            <span class="project-tag-pill">DSP</span><span
+                                                class="project-tag-pill">Python</span>
+                                        </div>
+                                    </div>
+                                    <span class="project-year-badge">2025</span>
+                                </div>
+                            </div>
+                            <p class="project-description-text">Real-time audio enhancement with Wiener Filter, Hanning
+                                Window, and Spectral Subtraction.</p>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================
+             WINDOW 7: Wallpaper Theme Switcher
+             ================================================================= -->
+        <div id="window-wallpapers" class="os-window">
+            <div class="window-header">
+                <div class="window-close-btn" data-close="window-wallpapers"></div>
+                <span class="window-title">Wallpaper Gallery</span>
+            </div>
+            <div class="window-body">
+                <div class="wallpapers-grid">
+                    <img class="wallpaper-thumbnail" src="OS/Assets/justin-wolff-Macs-aqy6Ek-unsplash.jpg"
+                        data-wall="OS/Assets/justin-wolff-Macs-aqy6Ek-unsplash.jpg" alt="Justin Wolff Ocean">
+                    <img class="wallpaper-thumbnail" src="OS/Assets/sunset-ocean.jpg"
+                        data-wall="OS/Assets/sunset-ocean.jpg" alt="Sunset Ocean">
+                    <img class="wallpaper-thumbnail" src="OS/Assets/your-name-sky-art.png"
+                        data-wall="OS/Assets/your-name-sky-art.png" alt="Sky Art">
+                    <img class="wallpaper-thumbnail" src="OS/Assets/Wallpaper_1.PNG"
+                        data-wall="OS/Assets/Wallpaper_1.PNG" alt="Anime City">
+                    <img class="wallpaper-thumbnail" src="OS/Assets/wall2.png" data-wall="OS/Assets/wall2.png"
+                        alt="Tropical Sea">
+                    <img class="wallpaper-thumbnail" src="OS/Assets/wall.gif" data-wall="OS/Assets/wall.gif"
+                        alt="Retro Pixel">
+                    <img class="wallpaper-thumbnail" src="OS/Assets/GguXoKuWIAAYE2t.png"
+                        data-wall="OS/Assets/GguXoKuWIAAYE2t.png" alt="Sun Gate">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Operating System Logic -->
+    <script src="script.js"></script>
 </body>
+
 </html>
