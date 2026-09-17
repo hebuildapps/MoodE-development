@@ -132,7 +132,7 @@ let highestZIndex = 100;
 function bringToFront(windowElement) {
     highestZIndex++;
     windowElement.style.zIndex = highestZIndex;
-    
+
     // Update active class
     document.querySelectorAll('.os-window').forEach(win => win.classList.remove('active'));
     windowElement.classList.add('active');
@@ -211,7 +211,7 @@ function makeDraggable(element) {
     function dragStart(e) {
         // Prevent drag on close button
         if (e.target.classList.contains('window-close-btn') || e.target.classList.contains('closebutton')) return;
-        
+
         e.preventDefault();
         isDragging = true;
         bringToFront(element);
@@ -349,7 +349,7 @@ const notesDatabase = {
         image: null,
         date: "3 posts",
         html: `<div class="notes-blog-list">
-            <a class="notes-blog-card" href="https://github.com/hebuildapps" target="_blank" rel="noopener">
+            <a class="notes-blog-card" href="https://www.heramb.icu/blog/AI4MH_ISSR" target="_blank" rel="noopener">
                 <div class="notes-blog-meta">
                     <span>2026-04-07</span>
                     <span>Proposal</span>
@@ -363,7 +363,7 @@ const notesDatabase = {
                 </div>
             </a>
 
-            <a class="notes-blog-card" href="https://github.com/hebuildapps" target="_blank" rel="noopener">
+            <a class="notes-blog-card" href="https://www.heramb.icu/blog/analyst-agent-blog" target="_blank" rel="noopener">
                 <div class="notes-blog-meta">
                     <span>2026-06-20</span>
                     <span>Systems</span>
@@ -394,7 +394,7 @@ const notesDatabase = {
     },
     opencv: {
         title: "Mood Detection Architecture",
-        image: "OS/Assets/photo-collage.jpg",
+        image: "OS/Assets/1000060468.jpg",
         date: "06/28/2023",
         html: `<p>MoodE utilizes real-time facial expression analysis with OpenCV's Haar Cascade classifier and a custom deep learning emotional valence network.</p>
 <p><strong>Core Emotion Classes:</strong><br>
@@ -420,8 +420,8 @@ const notesProse = document.getElementById('notes-prose');
 const notesScratchpad = document.getElementById('notes-scratchpad');
 
 // Load saved scratchpad text from localStorage
-const savedScratchpad = localStorage.getItem('moode_notes_scratchpad') || 
-`// MoodE Scratchpad
+const savedScratchpad = localStorage.getItem('moode_notes_scratchpad') ||
+    `// MoodE Scratchpad
 // Type your ideas, hackathon logs, or thoughts here.
 `;
 if (notesScratchpad) {
@@ -463,24 +463,343 @@ notesItems.forEach(item => {
 });
 
 // =============================================================================
-// 5. Wallpaper Switcher
+// 5. Dynamic Grid-Reveal Wallpaper System
 // =============================================================================
+const DEFAULT_WALLPAPER = 'OS/Assets/justin-wolff-Macs-aqy6Ek-unsplash.jpg';
 const desktop = document.getElementById('desktop');
-const savedWallpaper = localStorage.getItem('moode_desktop_wall');
-if (desktop) {
-    if (savedWallpaper && !savedWallpaper.includes('sunset-ocean.jpg')) {
-        desktop.style.backgroundImage = `url('${savedWallpaper}')`;
-    } else {
-        desktop.style.backgroundImage = `url('OS/Assets/justin-wolff-Macs-aqy6Ek-unsplash.jpg')`;
+const wallpaperCanvas = document.getElementById('wallpaper-canvas');
+
+// Clean up stale or legacy wallpapers (like sunset-ocean.jpg)
+let activeWallpaper = localStorage.getItem('moode_desktop_wall');
+if (!activeWallpaper || activeWallpaper.includes('sunset-ocean.jpg') || activeWallpaper.includes('undefined')) {
+    activeWallpaper = DEFAULT_WALLPAPER;
+    localStorage.setItem('moode_desktop_wall', DEFAULT_WALLPAPER);
+}
+
+// Preload and immediately set default wallpaper on desktop
+const initialImg = new Image();
+initialImg.src = activeWallpaper;
+initialImg.onload = () => {
+    if (desktop) {
+        desktop.style.backgroundImage = `url('${activeWallpaper}')`;
     }
+};
+if (desktop) {
+    desktop.style.backgroundImage = `url('${activeWallpaper}')`;
+}
+
+// Grid Reveal Subdivision & Animation Engine (adapted from wallpaperreveal.tsx)
+const GRID_CELLS = 140;
+const GRID_OPENING = 4;
+const GRID_MORPH = 0.055;
+const GRID_SAMPLE = 128;
+const GRID_COLOR_MS = 380;
+const GRID_GUTTER_FROM = 0.35;
+const GRID_GUTTER_TO = 0.75;
+const GRID_PHOTO_FROM = 0.92;
+
+const clamp01 = (n) => (n > 0 ? (n < 1 ? n : 1) : 0);
+const mix = (a, b, t) => a + (b - a) * t;
+const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+function smoothstep(a, b, x) {
+    const t = clamp01((x - a) / (b - a));
+    return t * t * (3 - 2 * t);
+}
+function hash(x, y, z) {
+    const n = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453;
+    return n - Math.floor(n);
+}
+function makeCell(x, y, w, h, parent) {
+    return {
+        x, y, w, h,
+        r: 0, g: 0, b: 0,
+        tone: hash(x + 3.1, y + 1.7, w * 31.7),
+        detail: 0, splitAt: 0,
+        parent, kids: null
+    };
+}
+function buildTree(aspect) {
+    const root = makeCell(0, 0, 1, 1, null);
+    const leaves = [root];
+    const branches = [];
+    while (leaves.length < GRID_CELLS) {
+        let pick = 0;
+        let widest = -1;
+        for (let i = 0; i < leaves.length; i++) {
+            const c = leaves[i];
+            const area = c.w * aspect * c.h * (1 + 0.12 * hash(c.x, c.y, 7.3));
+            if (area > widest) {
+                widest = area;
+                pick = i;
+            }
+        }
+        const parent = leaves.splice(pick, 1)[0];
+        const wide = parent.w * aspect >= parent.h;
+        const half = wide ? parent.w / 2 : parent.h / 2;
+        const a = wide
+            ? makeCell(parent.x, parent.y, half, parent.h, parent)
+            : makeCell(parent.x, parent.y, parent.w, half, parent);
+        const b = wide
+            ? makeCell(parent.x + half, parent.y, half, parent.h, parent)
+            : makeCell(parent.x, parent.y + half, parent.w, half, parent);
+        parent.kids = [a, b];
+        branches.push(parent);
+        leaves.push(a, b);
+    }
+    const opening = GRID_OPENING - 1;
+    const rest = Math.max(1, branches.length - opening);
+    branches.forEach((cell, i) => {
+        cell.splitAt = i < opening ? -GRID_MORPH : (0.92 * (i - opening + 1)) / rest;
+    });
+    return { root, branches };
+}
+function coverRect(iw, ih, w, h) {
+    const s = Math.max(w / iw, h / ih);
+    return { dx: (w - iw * s) / 2, dy: (h - ih * s) / 2, dw: iw * s, dh: ih * s };
+}
+function measureTree(root, pixels, size) {
+    const gather = (cell) => {
+        let s;
+        if (cell.kids) {
+            const a = gather(cell.kids[0]);
+            const b = gather(cell.kids[1]);
+            s = { n: a.n + b.n, r: a.r + b.r, g: a.g + b.g, b: a.b + b.b, l: a.l + b.l, l2: a.l2 + b.l2 };
+        } else {
+            s = { n: 0, r: 0, g: 0, b: 0, l: 0, l2: 0 };
+            const x0 = Math.round(cell.x * size);
+            const y0 = Math.round(cell.y * size);
+            const x1 = Math.max(x0 + 1, Math.round((cell.x + cell.w) * size));
+            const y1 = Math.max(y0 + 1, Math.round((cell.y + cell.h) * size));
+            for (let y = y0; y < y1; y++) {
+                for (let x = x0; x < x1; x++) {
+                    const i = (y * size + x) * 4;
+                    const r = pixels[i];
+                    const g = pixels[i + 1];
+                    const b = pixels[i + 2];
+                    const l = 0.299 * r + 0.587 * g + 0.114 * b;
+                    s.n++; s.r += r; s.g += g; s.b += b; s.l += l; s.l2 += l * l;
+                }
+            }
+        }
+        const n = s.n || 1;
+        cell.r = s.r / n;
+        cell.g = s.g / n;
+        cell.b = s.b / n;
+        cell.detail = Math.max(0, s.l2 / n - (s.l / n) * (s.l / n));
+        return s;
+    };
+    gather(root);
+}
+function orderByDetail(branches, openedBefore) {
+    const pending = branches.filter((c) => c.splitAt > openedBefore);
+    if (pending.length < 2) return;
+    const slots = pending.map((c) => c.splitAt).sort((a, b) => a - b);
+    const queue = pending.filter((c) => !c.parent || c.parent.splitAt <= openedBefore);
+    let next = 0;
+    while (queue.length && next < slots.length) {
+        let pick = 0;
+        for (let i = 1; i < queue.length; i++) {
+            if (queue[i].detail > queue[pick].detail) pick = i;
+        }
+        const cell = queue.splice(pick, 1)[0];
+        cell.splitAt = slots[next++];
+        for (const kid of cell.kids || []) {
+            if (kid.kids) queue.push(kid);
+        }
+    }
+}
+function readAverages(img, root, branches, at) {
+    const buffer = document.createElement('canvas');
+    buffer.width = GRID_SAMPLE;
+    buffer.height = GRID_SAMPLE;
+    const bCtx = buffer.getContext('2d', { willReadFrequently: true });
+    if (!bCtx) return false;
+    const fit = coverRect(img.naturalWidth, img.naturalHeight, GRID_SAMPLE, GRID_SAMPLE);
+    bCtx.drawImage(img, fit.dx, fit.dy, fit.dw, fit.dh);
+    try {
+        measureTree(root, bCtx.getImageData(0, 0, GRID_SAMPLE, GRID_SAMPLE).data, GRID_SAMPLE);
+        orderByDetail(branches, at);
+        return true;
+    } catch {
+        return false;
+    }
+}
+function greyOf(tone, dark, clock) {
+    return (dark ? 28 : 220) + tone * 14 + Math.sin(clock * 1.5 + tone * 6.28) * 3;
+}
+
+let activeRevealAnim = null;
+
+function triggerWallpaperGridReveal(newWallUrl) {
+    if (!wallpaperCanvas || !desktop) return;
+
+    if (activeRevealAnim) {
+        cancelAnimationFrame(activeRevealAnim);
+        activeRevealAnim = null;
+    }
+
+    const ctx = wallpaperCanvas.getContext('2d');
+    if (!ctx) return;
+
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    wallpaperCanvas.width = w;
+    wallpaperCanvas.height = h;
+    wallpaperCanvas.classList.add('active');
+
+    const aspect = w / h;
+    const { root, branches } = buildTree(aspect);
+
+    const scene = {
+        ctx, root, width: w, height: h, scale: Math.min(w, h) / 100,
+        dark: true, clock: 0, split: 0, fade: 0, hasColors: false, image: null
+    };
+
+    const targetImg = new Image();
+    let loadedAt = 0;
+    targetImg.crossOrigin = 'anonymous';
+
+    targetImg.onload = () => {
+        scene.image = targetImg;
+        loadedAt = performance.now();
+        scene.hasColors = readAverages(targetImg, root, branches, scene.split);
+    };
+    targetImg.onerror = () => {
+        targetImg.removeAttribute('crossOrigin');
+        targetImg.onload = () => {
+            scene.image = targetImg;
+            loadedAt = performance.now();
+        };
+        targetImg.src = newWallUrl;
+    };
+    targetImg.src = newWallUrl;
+
+    let last = 0;
+    let elapsed = 0;
+    let eased = 0;
+    let split = 0;
+    let fired = false;
+
+    function renderScene(s) {
+        const tint = s.hasColors ? s.fade : 0;
+        const shade = (grey, target) => Math.round(mix(grey, target, tint));
+        const base = greyOf(s.root.tone, s.dark, s.clock);
+
+        s.ctx.fillStyle = `rgb(${Math.round(shade(base, s.root.r) * 0.92)},${Math.round(shade(base, s.root.g) * 0.92)},${Math.round(shade(base, s.root.b) * 0.92)})`;
+        s.ctx.fillRect(0, 0, s.width, s.height);
+
+        const soft = 1 - smoothstep(GRID_GUTTER_FROM, GRID_GUTTER_TO, s.split);
+        const gutter = s.scale * soft;
+        const rounded = soft > 0.01 && typeof s.ctx.roundRect === 'function';
+
+        const paint = (p) => {
+            const px = Math.round(p.x);
+            const py = Math.round(p.y);
+            const pw = Math.round(p.x + p.w) - px;
+            const ph = Math.round(p.y + p.h) - py;
+            const onLeft = px <= 0;
+            const onTop = py <= 0;
+            const onRight = px + pw >= s.width;
+            const onBottom = py + ph >= s.height;
+            const left = onLeft ? 0 : gutter;
+            const top = onTop ? 0 : gutter;
+            const innerW = pw - left - (onRight ? 0 : gutter);
+            const innerH = ph - top - (onBottom ? 0 : gutter);
+            if (innerW <= 0 || innerH <= 0) return;
+
+            const grey = greyOf(p.tone, s.dark, s.clock);
+            s.ctx.fillStyle = `rgb(${shade(grey, p.r)},${shade(grey, p.g)},${shade(grey, p.b)})`;
+
+            if (rounded) {
+                const radius = Math.min(innerW, innerH) * 0.12 * soft;
+                s.ctx.beginPath();
+                s.ctx.roundRect(px + left, py + top, innerW, innerH, [
+                    !onLeft && !onTop ? radius : 0,
+                    !onRight && !onTop ? radius : 0,
+                    !onRight && !onBottom ? radius : 0,
+                    !onLeft && !onBottom ? radius : 0,
+                ]);
+                s.ctx.fill();
+            } else {
+                s.ctx.fillRect(px + left, py + top, innerW, innerH);
+            }
+        };
+
+        const walk = (cell, p) => {
+            if (!cell.kids || s.split < cell.splitAt) {
+                paint(p);
+                return;
+            }
+            const t = easeOut(clamp01((s.split - cell.splitAt) / GRID_MORPH));
+            for (const kid of cell.kids) {
+                walk(kid, {
+                    x: mix(p.x, kid.x * s.width, t),
+                    y: mix(p.y, kid.y * s.height, t),
+                    w: mix(p.w, kid.w * s.width, t),
+                    h: mix(p.h, kid.h * s.height, t),
+                    r: mix(p.r, kid.r, t),
+                    g: mix(p.g, kid.g, t),
+                    b: mix(p.b, kid.b, t),
+                    tone: mix(p.tone, kid.tone, t),
+                });
+            }
+        };
+
+        walk(s.root, { x: 0, y: 0, w: s.width, h: s.height, r: s.root.r, g: s.root.g, b: s.root.b, tone: s.root.tone });
+
+        if (!s.image) return;
+        const photo = s.hasColors ? smoothstep(GRID_PHOTO_FROM, 1, s.split) * s.fade : s.fade;
+        if (photo <= 0.002) return;
+        const fit = coverRect(s.image.naturalWidth, s.image.naturalHeight, s.width, s.height);
+        s.ctx.globalAlpha = photo;
+        s.ctx.drawImage(s.image, fit.dx, fit.dy, fit.dw, fit.dh);
+        s.ctx.globalAlpha = 1;
+    }
+
+    const tick = (now) => {
+        activeRevealAnim = requestAnimationFrame(tick);
+        if (!last) last = now;
+        const dt = Math.min((now - last) / 1000, 0.05);
+        last = now;
+        elapsed += dt;
+        scene.clock = elapsed;
+
+        const ready = scene.image !== null;
+        const target = ready ? 1 : Math.min(elapsed * 0.6, 0.72);
+        eased += (target - eased) * (1 - Math.exp(-dt * 6));
+        split += (eased - split) * (1 - Math.exp(-dt * 4.5));
+        scene.split = split;
+
+        if (loadedAt > 0) {
+            scene.fade = clamp01((now - loadedAt) / GRID_COLOR_MS);
+        }
+
+        renderScene(scene);
+
+        if (!fired && ready && split > 0.985) {
+            fired = true;
+            desktop.style.backgroundImage = `url('${newWallUrl}')`;
+            localStorage.setItem('moode_desktop_wall', newWallUrl);
+        }
+
+        if (fired && split > 0.998) {
+            cancelAnimationFrame(activeRevealAnim);
+            activeRevealAnim = null;
+            wallpaperCanvas.classList.remove('active');
+            setTimeout(() => {
+                ctx.clearRect(0, 0, w, h);
+            }, 250);
+        }
+    };
+
+    activeRevealAnim = requestAnimationFrame(tick);
 }
 
 document.querySelectorAll('.wallpaper-thumbnail').forEach(thumb => {
     thumb.addEventListener('click', () => {
         const wallUrl = thumb.getAttribute('data-wall');
-        if (desktop && wallUrl) {
-            desktop.style.backgroundImage = `url('${wallUrl}')`;
-            localStorage.setItem('moode_desktop_wall', wallUrl);
+        if (wallUrl) {
+            triggerWallpaperGridReveal(wallUrl);
         }
     });
 });
@@ -528,7 +847,7 @@ if (elongateBtn && windowIntro) {
             introXContainer.style.display = 'none';
             introVideoContainer.style.display = 'block';
             if (introWinTitle) introWinTitle.textContent = 'who-am-i.mp4';
-            if (introVideoPlayer) introVideoPlayer.play().catch(() => {});
+            if (introVideoPlayer) introVideoPlayer.play().catch(() => { });
             bringToFront(windowIntro);
         });
     }
@@ -614,7 +933,7 @@ let currentChatMode = 'ai'; // 'ai' or 'human'
 // When running locally, port 5174 provides the CORS proxy that safely communicates with heramb.icu.
 // If the page is hosted on localhost/127.0.0.1 (even on IDE preview ports), route through http://127.0.0.1:5174.
 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const API_BASE = isLocal 
+const API_BASE = isLocal
     ? (window.location.port === '5174' ? '' : 'http://127.0.0.1:5174')
     : 'https://heramb.icu';
 const CHAT_API_URL = `${API_BASE}/api/chat`;
@@ -627,7 +946,7 @@ function setModeBadge(mode) {
     const badge = document.getElementById('contact-mode-badge');
     const text = document.getElementById('contact-mode-text');
     if (!badge) return;
-    
+
     if (mode === 'human') {
         badge.classList.add('human');
     } else {
